@@ -1,0 +1,30 @@
+{
+  "name": "graph.exe-react",
+  "version": "0.0.1",
+  "description": "React Plugin for graph.exe",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc",
+    "build:cjs": "tsc --module CommonJS --outDir dist/cjs"
+  },
+  "author": "Alexandra Thubeauville",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^18.7.18",
+    "@types/react": "^18.0.20",
+    "@types/react-dom": "^18.0.6",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^4.8.3",
+    "graph.exe-core": "file:../graph.exe-core-0.0.1.tgz"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
