@@ -4,10 +4,12 @@ import { Grid } from "./Grid";
 
 const connectionStageCSS: CSSProperties = {
     width: "100%",
-    backgroundColor: "rgb(38,38, 38)",
+    backgroundColor: "rgb(38,38, 38)"
 }
 
 export const ConnectionStage = (props: ConnectionStageProps) => {
+
+    const stageRef = useRef<SVGSVGElement>(null);
 
     const [clientDimensions, setClientDimensions] = useState<clientDimension>({
         width: 0,
@@ -26,11 +28,13 @@ export const ConnectionStage = (props: ConnectionStageProps) => {
         })
     }
 
+
     useEffect(() => {
         updateClientDimensions();
-    })
+        window.addEventListener("resize", updateClientDimensions)
+        return () => window.removeEventListener("resize", updateClientDimensions);
 
-    const stageRef = useRef<SVGSVGElement>(null);
+    }, [])
 
     return (
         <svg
