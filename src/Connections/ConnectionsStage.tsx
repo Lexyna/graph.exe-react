@@ -1,5 +1,5 @@
 import React, { CSSProperties, useEffect, useRef, useState } from "react";
-import { clientDimension, DragOffset } from "../Utils/utilTypes";
+import { clientDimension, Offset } from "../Utils/utilTypes";
 import { Grid } from "./Grid";
 
 const connectionStageCSS: CSSProperties = {
@@ -44,8 +44,8 @@ export const ConnectionStage = (props: ConnectionStageProps) => {
             <Grid
                 width={clientDimensions.width}
                 height={clientDimensions.height}
-                offsetX={props.dragOffset.x}
-                offsetY={props.dragOffset.y}
+                offsetX={props.panningOffset.x}
+                offsetY={props.panningOffset.y}
                 editorOffset={props.editorOffset}
                 zoom={props.zoom}
             ></Grid>
@@ -56,5 +56,5 @@ export const ConnectionStage = (props: ConnectionStageProps) => {
 export interface ConnectionStageProps {
     zoom: number,
     editorOffset: { x: number, y: number },
-    dragOffset: DragOffset
+    panningOffset: Offset
 }

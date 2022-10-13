@@ -3,7 +3,7 @@ export interface clientDimension {
     height: number
 }
 
-export interface DragOffset {
+export interface Offset {
     x: number,
     y: number
 }
