@@ -1,8 +1,9 @@
 import React, { CSSProperties, MouseEvent, useRef, useState, WheelEvent } from "react";
 import { ConnectionStage } from "../Connections/ConnectionsStage";
 import { EditorContextMenu } from "../ContextMenu/EditorContextMenu";
-import { ProtoEngineNodeDict, ProtoNodeDict } from "../ProtoTypes/ProtoNode";
+import { ProtoEngineNode, ProtoNodeDict } from "../ProtoTypes/ProtoNode";
 import { Offset } from "../Utils/utilTypes";
+import { GraphNode } from "./GraphNode";
 
 const nodeEditorCSS: CSSProperties = {
     height: "inherit",
@@ -44,6 +45,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
     }
 
     const onMouseMoveHandler = (e: MouseEvent) => {
+        updateNodePosition(e);
         updatePanningOffset(e);
     }
 
@@ -52,6 +54,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
     }
 
     const onMouseUpHandler = (e: MouseEvent) => {
+        setDragNodeId(null);
         setIsPanning(false);
     }
 
@@ -77,6 +80,63 @@ export const NodeEditor = (props: NodeEditorProps) => {
         })
     }
 
+    const [dragNodeId, setDragNodeId] = useState<string | null>("");
+
+    const [dragOffset, setDragOffset] = useState<Offset>({ x: 0, y: 0 })
+
+    const dragHandler = (id: string, x: number, y: number) => {
+        setDragNodeId(id);
+        setDragOffset({ x: x, y: y });
+    }
+
+    const [nodes, setNodes] = useState<ProtoEngineNode[]>(props.nodes)
+
+    const deleteNode = (nodeId: string) => {
+        const newNodes: ProtoEngineNode[] = [];
+
+        nodes.forEach((n: ProtoEngineNode) => {
+            if (nodeId !== n.id) newNodes.push(n);
+        })
+
+        setNodes(newNodes);
+    }
+
+    const reorderNode = (index: number) => {
+        const reorderedNodes = createNodeArrayCopy(nodes);
+        const activeNode: ProtoEngineNode = reorderedNodes[index];
+
+        reorderedNodes.splice(index, 1);
+        reorderedNodes.push(activeNode);
+        setNodes(reorderedNodes);
+    }
+
+    const updateNodePosition = (e: MouseEvent) => {
+        if (!dragNodeId) return;
+
+        const nodeCopies = createNodeArrayCopy(nodes);
+        nodeCopies.forEach((node, index) => {
+            if (node.id !== dragNodeId) return;
+            nodeCopies[index].position.x = e.pageX / zoom - dragOffset.x / zoom - panningOffset.x / zoom;
+            nodeCopies[index].position.y = e.pageY / zoom - dragOffset.y / zoom - panningOffset.y / zoom;
+        });
+        setNodes(nodeCopies);
+    }
+
+    const updateData = (nodeId: string, input: boolean, index: number, data: any) => {
+        const nodeCopies = createNodeArrayCopy(nodes);
+
+        nodeCopies.forEach((node, nodeIndex) => {
+            if (node.id !== nodeId) return;
+            if (input) nodeCopies[nodeIndex].inputs[index].data = data;
+            else nodeCopies[nodeIndex].outputs[index].data = data;
+        })
+        setNodes(nodeCopies);
+    }
+
+    const addNode = (node: ProtoEngineNode) => {
+        setNodes(nodes.concat(node));
+    }
+
     return (
         <div
             ref={editorRef}
@@ -90,7 +150,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
             }}
         >
             <EditorContextMenu
-                addNode={(node) => { }}
+                addNode={addNode}
                 config={props.config}
                 panning={panningOffset}
                 show={contextMenuOptions.show}
@@ -105,16 +165,46 @@ export const NodeEditor = (props: NodeEditorProps) => {
                 panningOffset={panningOffset}
                 showContextMenu={showContextMenu}
             ></ConnectionStage>
+            {nodes.map((node: ProtoEngineNode, index: number) => {
+                return (
+                    <GraphNode
+                        key={node.id}
+                        index={index}
+                        engineNode={node}
+                        configNode={props.config[node.configId]}
+                        editorOffset={{ x: 0, y: 0 }}
+                        zoom={zoom}
+                        position={{
+                            x: node.position.x * zoom + panningOffset.x,
+                            y: node.position.y * zoom + panningOffset.y
+                        }}
+                        deleteNode={deleteNode}
+                        dragHandler={dragHandler}
+                        reorderNode={reorderNode}
+                        updateData={updateData}
+                    ></GraphNode>
+                )
+            })}
         </div>
     )
 }
 
 export interface NodeEditorProps {
     config: ProtoNodeDict,
-    nodes: ProtoEngineNodeDict
+    nodes: ProtoEngineNode[]
 }
 export interface ContextMenuOptions {
     show: boolean,
     x: number,
     y: number
+}
+
+const createNodeArrayCopy = (nodes: ProtoEngineNode[]): ProtoEngineNode[] => {
+    return nodes.map(n => {
+        return {
+            ...n,
+            inputs: n.inputs.map(io => { return { ...io } }),
+            outputs: n.outputs.map(io => { return { ...io } })
+        }
+    })
 }

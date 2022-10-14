@@ -1,4 +1,5 @@
 import { updateType } from "graph.exe-core";
+import { nanoid } from "nanoid";
 import React, { CSSProperties, KeyboardEvent, useEffect, useRef, useState } from "react";
 import { ProtoEngineNode, ProtoNode, ProtoNodeDict } from "../ProtoTypes/ProtoNode";
 import { Offset } from "../Utils/utilTypes";
@@ -103,7 +104,7 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
     const addNodeToEditor = (x: number, y: number, node: ProtoNode) => {
 
         const engineNode: ProtoEngineNode = {
-            id: "use nanoid()",
+            id: nanoid(),
             configId: node.id,
             updateType: node.updateType ? node.updateType : updateType.DYNAMIC,
             position: {

@@ -2,6 +2,7 @@ import { EngineIO } from "graph.exe-core";
 import React from "react";
 
 export interface ProtoIO<T, K> extends EngineIO<T, K> {
+    label: string,
     extra: React.FC<ExtraProps<T, K>> | null
 }
 
