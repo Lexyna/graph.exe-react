@@ -1,6 +1,7 @@
-import { ConfigNodeDict, EngineNodeDict } from "graph.exe-core";
 import React, { CSSProperties, MouseEvent, useRef, useState, WheelEvent } from "react";
 import { ConnectionStage } from "../Connections/ConnectionsStage";
+import { EditorContextMenu } from "../ContextMenu/EditorContextMenu";
+import { ProtoEngineNodeDict, ProtoNodeDict } from "../ProtoTypes/ProtoNode";
 import { Offset } from "../Utils/utilTypes";
 
 const nodeEditorCSS: CSSProperties = {
@@ -54,6 +55,28 @@ export const NodeEditor = (props: NodeEditorProps) => {
         setIsPanning(false);
     }
 
+    //helper state to track context menu options
+    const [contextMenuOptions, setContextMenuOptions] = useState<ContextMenuOptions>({
+        show: false,
+        x: 0,
+        y: 0
+    })
+
+    const showContextMenu = (e: MouseEvent) => {
+        setContextMenuOptions({
+            show: true,
+            x: e.clientX,
+            y: e.clientY
+        })
+    }
+
+    const hideContextMenu = () => {
+        setContextMenuOptions({
+            ...contextMenuOptions,
+            show: false,
+        })
+    }
+
     return (
         <div
             ref={editorRef}
@@ -62,17 +85,36 @@ export const NodeEditor = (props: NodeEditorProps) => {
             onMouseMove={onMouseMoveHandler}
             onMouseDown={onMouseDownHandler}
             onMouseUp={onMouseUpHandler}
+            onClick={() => {
+                hideContextMenu();
+            }}
         >
+            <EditorContextMenu
+                addNode={(node) => { }}
+                config={props.config}
+                panning={panningOffset}
+                show={contextMenuOptions.show}
+                zoom={zoom}
+                x={contextMenuOptions.x}
+                y={contextMenuOptions.y}
+
+            ></EditorContextMenu>
             <ConnectionStage
                 zoom={zoom}
                 editorOffset={{ x: 0, y: 0 }}
                 panningOffset={panningOffset}
+                showContextMenu={showContextMenu}
             ></ConnectionStage>
         </div>
     )
 }
 
 export interface NodeEditorProps {
-    config: ConfigNodeDict,
-    nodes: EngineNodeDict
+    config: ProtoNodeDict,
+    nodes: ProtoEngineNodeDict
+}
+export interface ContextMenuOptions {
+    show: boolean,
+    x: number,
+    y: number
 }

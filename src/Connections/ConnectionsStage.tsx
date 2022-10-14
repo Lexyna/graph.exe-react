@@ -1,4 +1,4 @@
-import React, { CSSProperties, useEffect, useRef, useState } from "react";
+import React, { CSSProperties, MouseEvent, useEffect, useRef, useState } from "react";
 import { clientDimension, Offset } from "../Utils/utilTypes";
 import { Grid } from "./Grid";
 
@@ -40,6 +40,10 @@ export const ConnectionStage = (props: ConnectionStageProps) => {
         <svg
             ref={stageRef}
             style={connectionStageCSS}
+            onContextMenu={e => {
+                e.preventDefault();
+                props.showContextMenu(e);
+            }}
         >
             <Grid
                 width={clientDimensions.width}
@@ -56,5 +60,6 @@ export const ConnectionStage = (props: ConnectionStageProps) => {
 export interface ConnectionStageProps {
     zoom: number,
     editorOffset: { x: number, y: number },
-    panningOffset: Offset
+    panningOffset: Offset,
+    showContextMenu: (e: MouseEvent) => void
 }
