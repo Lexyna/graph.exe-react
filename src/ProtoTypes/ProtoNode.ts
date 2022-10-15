@@ -24,3 +24,7 @@ export interface ProtoNodeDict {
 export interface ProtoEngineNode extends EngineNode {
     position: { x: number, y: number }
 }
+
+export interface ProtoEngineNodeDict {
+    [k: string]: ProtoEngineNode
+}

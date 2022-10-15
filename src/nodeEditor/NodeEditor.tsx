@@ -1,8 +1,9 @@
-import { ConnectionDetails, connector, EngineConnections } from "graph.exe-core";
+import { ConnectionDetails, connectionFinder, connector, EngineConnections, splitter } from "graph.exe-core";
+import { CON_MAPPING } from "graph.exe-core/dist/cjs/core/IO/IOMapping";
 import React, { CSSProperties, MouseEvent, useRef, useState, WheelEvent } from "react";
 import { ConnectionStage } from "../Connections/ConnectionsStage";
 import { EditorContextMenu } from "../ContextMenu/EditorContextMenu";
-import { ProtoEngineNode, ProtoNodeDict } from "../ProtoTypes/ProtoNode";
+import { ProtoEngineNode, ProtoEngineNodeDict, ProtoNodeDict } from "../ProtoTypes/ProtoNode";
 import { computeBezierCurve } from "../Utils/utils";
 import { Offset } from "../Utils/utilTypes";
 import { GraphNode } from "./GraphNode";
@@ -92,7 +93,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
         setDragOffset({ x: x, y: y });
     }
 
-    const [nodes, setNodes] = useState<ProtoEngineNode[]>(props.nodes)
+    const [nodes, setNodes] = useState<ProtoEngineNode[]>(Object.values(props.nodes))
 
     const [connectionReferences, setConnectionReferences] = useState<ConnectionReferences>({});
 
@@ -114,6 +115,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
             if (nodeId !== n.id) newNodes.push(n);
         })
 
+        delete props.nodes[nodeId];
         setNodes(newNodes);
     }
 
@@ -150,6 +152,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
     }
 
     const addNode = (node: ProtoEngineNode) => {
+        props.nodes[node.id] = node;
         setNodes(nodes.concat(node));
     }
 
@@ -183,12 +186,47 @@ export const NodeEditor = (props: NodeEditorProps) => {
     const [connections, setConnections] = useState<EngineConnections>(props.connections)
 
     const onConnect = (inputDetails: ConnectionDetails) => {
-        if (selectedOutputDetails === null) return;
+        //Possibly refactor this into the core as conditionalConnector
+        if (selectedOutputDetails === null) {
+            const existingConnections: ConnectionDetails[] = connectionFinder(inputDetails, connections);
+            if (existingConnections.length === 0) return;
+            splitter(existingConnections[0], inputDetails, connections);
+            setSelectedOutputId(existingConnections[0]);
+            return;
+        }
 
+        //test if the connectionType is valid
+        if (props.nodes[inputDetails.nodeId].inputs[inputDetails.index].type !==
+            props.nodes[selectedOutputDetails.nodeId].outputs[selectedOutputDetails.index].type) return;
+
+        const mapping: CON_MAPPING = props.nodes[inputDetails.nodeId].inputs[inputDetails.index].mapping;
+        const existingConnections: ConnectionDetails[] = connectionFinder(inputDetails, connections);
+
+        //create new connection
+        if (existingConnections.length === 0 && mapping === CON_MAPPING.SINGLE) {
+            const connectionsCopy = createConnectionsCopy(connections);
+            connector(selectedOutputDetails, inputDetails, connectionsCopy);
+            removePreviewConnection();
+            setConnections(connectionsCopy);
+            return;
+        }
+
+        //replace existing connection
+        if (existingConnections.length === 1 && mapping === CON_MAPPING.SINGLE) {
+            const connectionsCopy = createConnectionsCopy(connections);
+            splitter(existingConnections[0], inputDetails, connections);
+            connector(selectedOutputDetails, inputDetails, connectionsCopy);
+            removePreviewConnection();
+            setConnections(connectionsCopy);
+            return;
+        }
+
+        //add connection (mulit connection)
         const connectionsCopy = createConnectionsCopy(connections);
         connector(selectedOutputDetails, inputDetails, connectionsCopy);
         removePreviewConnection();
         setConnections(connectionsCopy);
+
     }
 
     return (
@@ -252,7 +290,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
 
 export interface NodeEditorProps {
     config: ProtoNodeDict,
-    nodes: ProtoEngineNode[],
+    nodes: ProtoEngineNodeDict,
     connections: EngineConnections
 }
 export interface ContextMenuOptions {
