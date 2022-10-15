@@ -2,6 +2,7 @@ import React, { CSSProperties, MouseEvent, useRef, useState, WheelEvent } from "
 import { ConnectionStage } from "../Connections/ConnectionsStage";
 import { EditorContextMenu } from "../ContextMenu/EditorContextMenu";
 import { ProtoEngineNode, ProtoNodeDict } from "../ProtoTypes/ProtoNode";
+import { computeBezierCurve } from "../Utils/utils";
 import { Offset } from "../Utils/utilTypes";
 import { GraphNode } from "./GraphNode";
 
@@ -47,6 +48,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
     const onMouseMoveHandler = (e: MouseEvent) => {
         updateNodePosition(e);
         updatePanningOffset(e);
+        updatePreviewConnection(e);
     }
 
     const onMouseDownHandler = (e: MouseEvent) => {
@@ -90,6 +92,19 @@ export const NodeEditor = (props: NodeEditorProps) => {
     }
 
     const [nodes, setNodes] = useState<ProtoEngineNode[]>(props.nodes)
+
+    const [connectionReferences, setConnectionReferences] = useState<ConnectionReferences>({});
+
+    const addConnectionReference = (nodeId: string) => (ref: ConnectionDot, isInput: boolean, index: number) => {
+        setConnectionReferences((cR) => {
+            const ioId: string = nodeId + (isInput ? "IN" : "OUT") + index;
+            if (ioId in cR) return { ...cR }
+            return {
+                ...cR,
+                [ioId]: ref
+            }
+        })
+    }
 
     const deleteNode = (nodeId: string) => {
         const newNodes: ProtoEngineNode[] = [];
@@ -137,6 +152,34 @@ export const NodeEditor = (props: NodeEditorProps) => {
         setNodes(nodes.concat(node));
     }
 
+    const [selectedOutputId, setSelectedOutputId] = useState<string | null>(null);
+
+    const [previewConnection, setPreviewConnection] = useState<string>("");
+
+    const updatePreviewConnection = (e: MouseEvent) => {
+        if (selectedOutputId === null) return;
+        const x2 = e.clientX;
+        const y2 = e.clientY;
+
+        setPreviewConnection(
+            computeBezierCurve(
+                connectionReferences[selectedOutputId].x() / zoom,
+                connectionReferences[selectedOutputId].y() / zoom,
+                x2 / zoom, y2 / zoom
+            )
+        )
+    }
+
+    const removePreviewConnection = () => {
+        setSelectedOutputId(null);
+        setPreviewConnection("null");
+    }
+
+
+    const onOutputClicked = (ioId: string) => {
+        setSelectedOutputId(ioId)
+    }
+
     return (
         <div
             ref={editorRef}
@@ -147,6 +190,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
             onMouseUp={onMouseUpHandler}
             onClick={() => {
                 hideContextMenu();
+                removePreviewConnection();
             }}
         >
             <EditorContextMenu
@@ -164,6 +208,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
                 editorOffset={{ x: 0, y: 0 }}
                 panningOffset={panningOffset}
                 showContextMenu={showContextMenu}
+                previewPath={previewConnection}
             ></ConnectionStage>
             {nodes.map((node: ProtoEngineNode, index: number) => {
                 return (
@@ -182,6 +227,8 @@ export const NodeEditor = (props: NodeEditorProps) => {
                         dragHandler={dragHandler}
                         reorderNode={reorderNode}
                         updateData={updateData}
+                        addConnectionReferences={addConnectionReference(node.id)}
+                        onOutputClicked={onOutputClicked}
                     ></GraphNode>
                 )
             })}
@@ -199,6 +246,18 @@ export interface ContextMenuOptions {
     y: number
 }
 
+/**
+ * k: nodeId + IN/OUT + index
+ */
+interface ConnectionReferences {
+    [k: string]: ConnectionDot
+}
+
+export interface ConnectionDot {
+    x: () => number;
+    y: () => number;
+}
+
 const createNodeArrayCopy = (nodes: ProtoEngineNode[]): ProtoEngineNode[] => {
     return nodes.map(n => {
         return {
@@ -208,3 +267,4 @@ const createNodeArrayCopy = (nodes: ProtoEngineNode[]): ProtoEngineNode[] => {
         }
     })
 }
+

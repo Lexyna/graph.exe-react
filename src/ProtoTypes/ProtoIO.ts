@@ -1,12 +1,12 @@
 import { EngineIO } from "graph.exe-core";
 import React from "react";
 
-export interface ProtoIO<T, K> extends EngineIO<T, K> {
+export interface ProtoIO<K, T> extends EngineIO<K, T> {
     label: string,
-    extra: React.FC<ExtraProps<T, K>> | null
+    extra: React.FC<ExtraProps<K, T>> | null
 }
 
-export interface ExtraProps<T, K> {
+export interface ExtraProps<K, T> {
     setData: (data: K) => void,
     data: K,
     value: T

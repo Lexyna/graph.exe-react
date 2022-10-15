@@ -53,6 +53,16 @@ export const ConnectionStage = (props: ConnectionStageProps) => {
                 editorOffset={props.editorOffset}
                 zoom={props.zoom}
             ></Grid>
+            <svg>
+                <path
+                    style={{ transform: `scale${props.zoom}` }}
+                    fill="none"
+                    stroke="gray"
+                    strokeWidth={2}
+                    strokeDasharray="20,5,5,10,5,5"
+                    d={props.previewPath}
+                />
+            </svg>
         </svg>
     )
 }
@@ -61,5 +71,6 @@ export interface ConnectionStageProps {
     zoom: number,
     editorOffset: { x: number, y: number },
     panningOffset: Offset,
-    showContextMenu: (e: MouseEvent) => void
+    showContextMenu: (e: MouseEvent) => void,
+    previewPath: string
 }

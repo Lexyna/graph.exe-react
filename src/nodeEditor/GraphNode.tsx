@@ -3,6 +3,7 @@ import { NodeIO } from "../NodeIO/NodeIO"
 import { io_ul_CSS } from "../NodeIO/NodeIOStyles"
 import { ProtoEngineNode, ProtoNode } from "../ProtoTypes/ProtoNode"
 import { Offset } from "../Utils/utilTypes"
+import { ConnectionDot } from "./NodeEditor"
 
 const headerCSS: CSSProperties = {
     backgroundColor: "#297286BB",
@@ -83,6 +84,7 @@ export const GraphNode = (props: NodeProps) => {
                                 io={io}
                                 extra={props.configNode.inputs[index].extra}
                                 updateData={props.updateData}
+                                addConnectionReference={props.addConnectionReferences}
                             >
                             </NodeIO>
                         </ul>
@@ -101,6 +103,8 @@ export const GraphNode = (props: NodeProps) => {
                                 io={io}
                                 extra={props.configNode.outputs[index].extra}
                                 updateData={props.updateData}
+                                addConnectionReference={props.addConnectionReferences}
+                                onOutputClicked={props.onOutputClicked}
                             >
                             </NodeIO>
                         </ul>
@@ -122,5 +126,7 @@ export interface NodeProps {
     updateData: (id: string, input: boolean, index: number, data: any) => void,
     dragHandler: (id: string, x: number, y: number) => void,
     deleteNode: (id: string) => void,
-    reorderNode: (index: number) => void
+    reorderNode: (index: number) => void,
+    addConnectionReferences: (ref: ConnectionDot, isInput: boolean, index: number) => void,
+    onOutputClicked: (ioId: string) => void
 }
