@@ -51,7 +51,7 @@ export const GraphNode = (props: NodeProps) => {
         props.reorderNode(props.index)
     }
 
-    //const deleteNode = () => { props.deleteNode(props.engineNode.id) }
+    const deleteNode = () => { props.deleteNode(props.engineNode.id) }
 
     let ioKey = 0;
 
@@ -61,6 +61,7 @@ export const GraphNode = (props: NodeProps) => {
                 style={nodeCSS}
                 onContextMenu={e => {
                     e.preventDefault();
+                    deleteNode();
                 }}
             >
                 <header

@@ -1,4 +1,5 @@
-import { ConnectionDetails, connectionFinder, connector, EngineConnections, EngineIO, splitter } from "graph.exe-core";
+import { ConnectionDetails, connectionFinder, connector, EngineConnections, EngineIO, extractor, splitter } from "graph.exe-core";
+import { NodePorts } from "graph.exe-core/dist/cjs/core/connections/Extractor";
 import { CON_MAPPING } from "graph.exe-core/dist/cjs/core/IO/IOMapping";
 import React, { CSSProperties, MouseEvent, useRef, useState, WheelEvent } from "react";
 import { ConnectionStage } from "../Connections/ConnectionsStage";
@@ -111,12 +112,38 @@ export const NodeEditor = (props: NodeEditorProps) => {
     const deleteNode = (nodeId: string) => {
         const newNodes: ProtoEngineNode[] = [];
 
+        const connectionsCopy = createConnectionsCopy(connections);
+        const referenceCopy = createReferenceCopy(connectionReferences);
+
         nodes.forEach((n: ProtoEngineNode) => {
             if (nodeId !== n.id) newNodes.push(n);
+            else {
+
+                const ports: NodePorts = extractor(n);
+
+                ports.inputs.forEach(io => {
+                    delete referenceCopy[io.ioId]
+                    const cons = connectionFinder(io, connectionsCopy);
+                    cons.forEach(out =>
+                        splitter(out, io, connectionsCopy)
+                    )
+                })
+
+                ports.outputs.forEach(io => {
+                    delete referenceCopy[io.ioId]
+                    const cons = connectionFinder(io, connectionsCopy);
+                    cons.forEach(inp => {
+                        splitter(io, inp, connectionsCopy);
+                    })
+                })
+
+            }
         })
 
+        setConnections(connectionsCopy)
         delete props.nodes[nodeId];
         setNodes(newNodes);
+        setConnectionReferences(referenceCopy)
     }
 
     const reorderNode = (index: number) => {
@@ -327,5 +354,11 @@ const createConnectionsCopy = (connections: EngineConnections): EngineConnection
     return {
         input: { ...connections.input },
         output: { ...connections.output }
+    }
+}
+
+const createReferenceCopy = (references: ConnectionReferences): ConnectionReferences => {
+    return {
+        ...references
     }
 }

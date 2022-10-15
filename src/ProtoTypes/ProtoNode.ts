@@ -18,7 +18,7 @@ export interface ProtoNodeDict {
 }
 
 /**
- * Modified version of EngineNode form graph.exe-core, add plugin specific types
+ * Modified version of EngineNode from graph.exe-core, adds plugin specific types
  * position: used to draw node in editor panel
  */
 export interface ProtoEngineNode extends EngineNode {
