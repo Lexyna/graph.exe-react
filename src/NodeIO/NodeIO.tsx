@@ -1,4 +1,4 @@
-import { EngineIO } from "graph.exe-core";
+import { ConnectionDetails, CONNECTION_TYPE, EngineIO } from "graph.exe-core";
 import React, { FunctionComponent, MouseEvent, useEffect, useRef } from "react";
 import { ConnectionDot } from "../nodeEditor";
 import { ExtraProps } from "../ProtoTypes/ProtoIO";
@@ -21,7 +21,21 @@ export const NodeIO = (props: NodeIOProps<any, any>) => {
     const onClick = (e: MouseEvent) => {
         e.stopPropagation();
         if (!props.isInput && props.onOutputClicked !== undefined) {
-            props.onOutputClicked(props.nodeId + "OUT" + props.index);
+            props.onOutputClicked({
+                nodeId: props.nodeId,
+                type: CONNECTION_TYPE.OUTPUT,
+                index: props.index,
+                ioId: props.nodeId + CONNECTION_TYPE.OUTPUT + props.index
+            });
+            return;
+        }
+        if (props.isInput && props.onInputClicked !== undefined) {
+            props.onInputClicked({
+                nodeId: props.nodeId,
+                type: CONNECTION_TYPE.INPUT,
+                index: props.index,
+                ioId: props.nodeId + CONNECTION_TYPE.INPUT + props.index
+            });
             return;
         }
     }
@@ -33,7 +47,7 @@ export const NodeIO = (props: NodeIOProps<any, any>) => {
                 x: () => {
                     if (!ioRef.current) return -1;
                     return ioRef.current?.getBoundingClientRect().left +
-                        ioRef.current?.getBoundingClientRect().width;
+                        ioRef.current?.getBoundingClientRect().width - 0.01;
                 },
                 y: () => {
                     if (!ioRef.current) return -1;
@@ -85,6 +99,7 @@ export interface NodeIOProps<T, K> {
     label: string,
     updateData: (nodeId: string, input: boolean, index: number, data: any) => void,
     addConnectionReference: (ref: ConnectionDot, isInput: boolean, index: number) => void,
-    onOutputClicked?: (ioId: string) => void,
+    onOutputClicked?: (ioDetails: ConnectionDetails) => void,
+    onInputClicked?: (inputDetails: ConnectionDetails) => void,
     children: React.ReactNode
 }

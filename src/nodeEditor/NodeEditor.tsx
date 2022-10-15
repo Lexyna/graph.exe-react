@@ -1,3 +1,4 @@
+import { ConnectionDetails, connector, EngineConnections } from "graph.exe-core";
 import React, { CSSProperties, MouseEvent, useRef, useState, WheelEvent } from "react";
 import { ConnectionStage } from "../Connections/ConnectionsStage";
 import { EditorContextMenu } from "../ContextMenu/EditorContextMenu";
@@ -97,7 +98,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
 
     const addConnectionReference = (nodeId: string) => (ref: ConnectionDot, isInput: boolean, index: number) => {
         setConnectionReferences((cR) => {
-            const ioId: string = nodeId + (isInput ? "IN" : "OUT") + index;
+            const ioId: string = nodeId + (isInput ? "INPUT" : "OUTPUT") + index;
             if (ioId in cR) return { ...cR }
             return {
                 ...cR,
@@ -152,19 +153,19 @@ export const NodeEditor = (props: NodeEditorProps) => {
         setNodes(nodes.concat(node));
     }
 
-    const [selectedOutputId, setSelectedOutputId] = useState<string | null>(null);
+    const [selectedOutputDetails, setSelectedOutputId] = useState<ConnectionDetails | null>(null);
 
     const [previewConnection, setPreviewConnection] = useState<string>("");
 
     const updatePreviewConnection = (e: MouseEvent) => {
-        if (selectedOutputId === null) return;
+        if (selectedOutputDetails === null) return;
         const x2 = e.clientX;
         const y2 = e.clientY;
 
         setPreviewConnection(
             computeBezierCurve(
-                connectionReferences[selectedOutputId].x() / zoom,
-                connectionReferences[selectedOutputId].y() / zoom,
+                connectionReferences[selectedOutputDetails.ioId].x() / zoom,
+                connectionReferences[selectedOutputDetails.ioId].y() / zoom,
                 x2 / zoom, y2 / zoom
             )
         )
@@ -175,9 +176,19 @@ export const NodeEditor = (props: NodeEditorProps) => {
         setPreviewConnection("null");
     }
 
-
-    const onOutputClicked = (ioId: string) => {
+    const onOutputClicked = (ioId: ConnectionDetails) => {
         setSelectedOutputId(ioId)
+    }
+
+    const [connections, setConnections] = useState<EngineConnections>(props.connections)
+
+    const onConnect = (inputDetails: ConnectionDetails) => {
+        if (selectedOutputDetails === null) return;
+
+        const connectionsCopy = createConnectionsCopy(connections);
+        connector(selectedOutputDetails, inputDetails, connectionsCopy);
+        removePreviewConnection();
+        setConnections(connectionsCopy);
     }
 
     return (
@@ -208,6 +219,8 @@ export const NodeEditor = (props: NodeEditorProps) => {
                 editorOffset={{ x: 0, y: 0 }}
                 panningOffset={panningOffset}
                 showContextMenu={showContextMenu}
+                connectionReferences={connectionReferences}
+                connections={connections}
                 previewPath={previewConnection}
             ></ConnectionStage>
             {nodes.map((node: ProtoEngineNode, index: number) => {
@@ -229,6 +242,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
                         updateData={updateData}
                         addConnectionReferences={addConnectionReference(node.id)}
                         onOutputClicked={onOutputClicked}
+                        onInputClicked={onConnect}
                     ></GraphNode>
                 )
             })}
@@ -238,7 +252,8 @@ export const NodeEditor = (props: NodeEditorProps) => {
 
 export interface NodeEditorProps {
     config: ProtoNodeDict,
-    nodes: ProtoEngineNode[]
+    nodes: ProtoEngineNode[],
+    connections: EngineConnections
 }
 export interface ContextMenuOptions {
     show: boolean,
@@ -249,7 +264,7 @@ export interface ContextMenuOptions {
 /**
  * k: nodeId + IN/OUT + index
  */
-interface ConnectionReferences {
+export interface ConnectionReferences {
     [k: string]: ConnectionDot
 }
 
@@ -268,3 +283,9 @@ const createNodeArrayCopy = (nodes: ProtoEngineNode[]): ProtoEngineNode[] => {
     })
 }
 
+const createConnectionsCopy = (connections: EngineConnections): EngineConnections => {
+    return {
+        input: { ...connections.input },
+        output: { ...connections.output }
+    }
+}

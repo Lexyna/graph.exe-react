@@ -1,3 +1,4 @@
+import { ConnectionDetails } from "graph.exe-core"
 import React, { CSSProperties, MouseEvent } from "react"
 import { NodeIO } from "../NodeIO/NodeIO"
 import { io_ul_CSS } from "../NodeIO/NodeIOStyles"
@@ -85,6 +86,7 @@ export const GraphNode = (props: NodeProps) => {
                                 extra={props.configNode.inputs[index].extra}
                                 updateData={props.updateData}
                                 addConnectionReference={props.addConnectionReferences}
+                                onInputClicked={props.onInputClicked}
                             >
                             </NodeIO>
                         </ul>
@@ -128,5 +130,6 @@ export interface NodeProps {
     deleteNode: (id: string) => void,
     reorderNode: (index: number) => void,
     addConnectionReferences: (ref: ConnectionDot, isInput: boolean, index: number) => void,
-    onOutputClicked: (ioId: string) => void
+    onOutputClicked: (ioDetails: ConnectionDetails) => void
+    onInputClicked: (inputDetails: ConnectionDetails) => void
 }
