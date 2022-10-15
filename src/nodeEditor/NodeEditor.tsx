@@ -1,10 +1,10 @@
-import { ConnectionDetails, connectionFinder, connector, EngineConnections, splitter } from "graph.exe-core";
+import { ConnectionDetails, connectionFinder, connector, EngineConnections, EngineIO, splitter } from "graph.exe-core";
 import { CON_MAPPING } from "graph.exe-core/dist/cjs/core/IO/IOMapping";
 import React, { CSSProperties, MouseEvent, useRef, useState, WheelEvent } from "react";
 import { ConnectionStage } from "../Connections/ConnectionsStage";
 import { EditorContextMenu } from "../ContextMenu/EditorContextMenu";
 import { ProtoEngineNode, ProtoEngineNodeDict, ProtoNodeDict } from "../ProtoTypes/ProtoNode";
-import { computeBezierCurve } from "../Utils/utils";
+import { computeBezierCurve, findIO } from "../Utils/utils";
 import { Offset } from "../Utils/utilTypes";
 import { GraphNode } from "./GraphNode";
 
@@ -195,9 +195,11 @@ export const NodeEditor = (props: NodeEditorProps) => {
             return;
         }
 
+        let input: EngineIO<any, any> = findIO(inputDetails, nodes);
+        let output: EngineIO<any, any> = findIO(selectedOutputDetails, nodes);
+
         //test if the connectionType is valid
-        if (props.nodes[inputDetails.nodeId].inputs[inputDetails.index].type !==
-            props.nodes[selectedOutputDetails.nodeId].outputs[selectedOutputDetails.index].type) return;
+        if (input.type !== output.type) return;
 
         const mapping: CON_MAPPING = props.nodes[inputDetails.nodeId].inputs[inputDetails.index].mapping;
         const existingConnections: ConnectionDetails[] = connectionFinder(inputDetails, connections);
