@@ -258,6 +258,12 @@ export const NodeEditor = (props: NodeEditorProps) => {
 
     }
 
+    const removeConnection = (inputDetails: ConnectionDetails, outputDetails: ConnectionDetails) => {
+        const connectionsCopy = createConnectionsCopy(connections);
+        splitter(outputDetails, inputDetails, connectionsCopy);
+        setConnections(connectionsCopy);
+    }
+
     return (
         <div
             ref={editorRef}
@@ -289,6 +295,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
                 connectionReferences={connectionReferences}
                 connections={connections}
                 previewPath={previewConnection}
+                deleteConnection={removeConnection}
             ></ConnectionStage>
             {nodes.map((node: ProtoEngineNode, index: number) => {
                 return (

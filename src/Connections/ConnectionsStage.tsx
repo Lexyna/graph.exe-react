@@ -1,4 +1,4 @@
-import { EngineConnections } from "graph.exe-core";
+import { ConnectionDetails, EngineConnections } from "graph.exe-core";
 import React, { CSSProperties, MouseEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ConnectionReferences } from "../nodeEditor";
 import { computeBezierCurve } from "../Utils/utils";
@@ -76,6 +76,7 @@ export const ConnectionStage = (props: ConnectionStageProps) => {
                             props.connectionReferences[value.self.ioId].x() / props.zoom - props.editorOffset.x / props.zoom,
                             props.connectionReferences[value.self.ioId].y() / props.zoom - props.editorOffset.y / props.zoom
                         )}
+                        deleteConnection={() => props.deleteConnection(value.self, details)}
                     />
                 })
             }) : null}
@@ -100,5 +101,6 @@ export interface ConnectionStageProps {
     showContextMenu: (e: MouseEvent) => void,
     connections: EngineConnections,
     connectionReferences: ConnectionReferences,
-    previewPath: string
+    previewPath: string,
+    deleteConnection: (inputDetails: ConnectionDetails, outputDetails: ConnectionDetails) => void
 }

@@ -15,7 +15,7 @@ export const Connection = (props: ConnectionProps) => {
     const onHoverLeave = () => { setStrokeWidth(2) }
 
     return (
-        <svg onMouseEnter={onHover} onMouseLeave={onHoverLeave}>
+        <svg onMouseEnter={onHover} onMouseLeave={onHoverLeave} onClick={props.deleteConnection}>
             <path
                 style={connectionStyle}
                 fill="none"
@@ -30,5 +30,6 @@ export interface ConnectionProps {
     zoom: number,
     color: string,
     dashArray: string,
-    d: string
+    d: string,
+    deleteConnection: () => void
 }
