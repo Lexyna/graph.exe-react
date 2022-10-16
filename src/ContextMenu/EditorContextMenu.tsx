@@ -175,7 +175,7 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
                     <div
                         style={editorContextMenuCSS} ref={contextMenuRef}
                     >
-                        {nodes.map((node, index) => {
+                        {nodes.filter(n => (n.private === undefined || !n.private)).map((node, index) => {
                             listId++;
                             return (
                                 <div

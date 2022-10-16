@@ -10,7 +10,8 @@ export interface ProtoNode extends ConfigNode {
     name: string,
     description: string,
     inputs: ProtoIO<any, any>[];
-    outputs: ProtoIO<any, any>[]
+    outputs: ProtoIO<any, any>[];
+    private?: boolean
 }
 
 export interface ProtoNodeDict {
