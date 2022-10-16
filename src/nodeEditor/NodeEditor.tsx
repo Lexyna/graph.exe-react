@@ -19,6 +19,11 @@ const nodeEditorCSS: CSSProperties = {
 
 export const NodeEditor = (props: NodeEditorProps) => {
 
+    const triggerGraphUpdate = () => {
+        if (props.update !== undefined)
+            props.update();
+    }
+
     const editorRef = useRef<HTMLDivElement>(null);
 
     const [zoom, setZoom] = useState<number>(1);
@@ -151,6 +156,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
         setConnectionWrapper(connectionsCopy)
         setNodeWrapper(newNodes);
         setConnectionReferences(referenceCopy)
+        triggerGraphUpdate()
     }
 
     const reorderNode = (index: number) => {
@@ -183,6 +189,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
             else nodeCopies[nodeIndex].outputs[index].data = data;
         })
         setNodeWrapper(nodeCopies);
+        triggerGraphUpdate()
     }
 
     const addNode = (node: ProtoEngineNode) => {
@@ -246,6 +253,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
             splitter(existingConnections[0], inputDetails, connectionsCopy);
             setSelectedOutputId(existingConnections[0]);
             setConnectionWrapper(connectionsCopy);
+            triggerGraphUpdate()
             return;
         }
 
@@ -264,6 +272,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
             connector(selectedOutputDetails, inputDetails, connectionsCopy);
             removePreviewConnection();
             setConnectionWrapper(connectionsCopy);
+            triggerGraphUpdate()
             return;
         }
 
@@ -274,15 +283,16 @@ export const NodeEditor = (props: NodeEditorProps) => {
             connector(selectedOutputDetails, inputDetails, connectionsCopy);
             removePreviewConnection();
             setConnectionWrapper(connectionsCopy);
+            triggerGraphUpdate()
             return;
         }
 
-        //add connection (mulit connection)
+        //add connection (multi connection)
         const connectionsCopy = createConnectionsCopy(connections);
         connector(selectedOutputDetails, inputDetails, connectionsCopy);
         removePreviewConnection();
         setConnectionWrapper(connectionsCopy);
-
+        triggerGraphUpdate()
     }
 
     const removeConnection = (inputDetails: ConnectionDetails, outputDetails: ConnectionDetails) => {
@@ -351,10 +361,17 @@ export const NodeEditor = (props: NodeEditorProps) => {
     )
 }
 
+/**
+ * @field config: ConfigNodes for the editor assigns functionality to engineNodes 
+ * @field nodes: EngineNodes use to display and store data and 
+ * @field connections: EngineNode connections
+ * @field update: Optional callback to a function that will trigger every time the graph changes
+ */
 export interface NodeEditorProps {
     config: ProtoNodeDict,
     nodes: ProtoEngineNodeDict,
-    connections: EngineConnections
+    connections: EngineConnections,
+    update?: () => void
 }
 export interface ContextMenuOptions {
     show: boolean,
