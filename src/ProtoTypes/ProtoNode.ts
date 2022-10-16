@@ -3,8 +3,9 @@ import { ProtoIO } from "./ProtoIO";
 
 /**
  *  Modified version of ConfigNode from graph.exe-core, adds Plugin specific types
- *  name: used to display the name of this type of node
- *  description: provides a description of this node to the user 
+ *  @field name: used to display the name of this type of node
+ *  @field description: provides a description of this node to the user 
+ *  @field private: if false, disables user ability to add new nodes of this type
  */
 export interface ProtoNode extends ConfigNode {
     name: string,
@@ -20,10 +21,12 @@ export interface ProtoNodeDict {
 
 /**
  * Modified version of EngineNode from graph.exe-core, adds plugin specific types
- * position: used to draw node in editor panel
+ * @field position: used to draw node in editor panel
+ * @field static: if true, node won't be deletable
  */
 export interface ProtoEngineNode extends EngineNode {
-    position: { x: number, y: number }
+    position: { x: number, y: number },
+    static: boolean
 }
 
 export interface ProtoEngineNodeDict {

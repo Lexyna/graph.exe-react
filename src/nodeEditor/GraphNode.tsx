@@ -51,7 +51,10 @@ export const GraphNode = (props: NodeProps) => {
         props.reorderNode(props.index)
     }
 
-    const deleteNode = () => { props.deleteNode(props.engineNode.id) }
+    const deleteNode = () => {
+        if (!props.engineNode.static)
+            props.deleteNode(props.engineNode.id)
+    }
 
     let ioKey = 0;
 

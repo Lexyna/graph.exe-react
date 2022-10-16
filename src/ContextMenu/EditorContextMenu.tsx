@@ -126,7 +126,8 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
                     type: io.type,
                     value: io.value
                 }
-            })
+            }),
+            static: false
         }
         props.addNode(engineNode);
     }
