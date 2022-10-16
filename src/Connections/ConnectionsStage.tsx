@@ -67,7 +67,7 @@ export const ConnectionStage = (props: ConnectionStageProps) => {
                 return value.connections.map((details) => {
                     return <Connection
                         key={details.ioId}
-                        color="green"
+                        color={props.connectionReferences[details.ioId].color}
                         dashArray=""
                         zoom={props.zoom}
                         d={computeBezierCurve(

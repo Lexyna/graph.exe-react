@@ -91,6 +91,7 @@ export const GraphNode = (props: NodeProps) => {
                                 updateData={props.updateData}
                                 addConnectionReference={props.addConnectionReferences}
                                 onInputClicked={props.onInputClicked}
+                                style={props.configNode.inputs[index].style}
                             >
                             </NodeIO>
                         </ul>
@@ -111,6 +112,7 @@ export const GraphNode = (props: NodeProps) => {
                                 updateData={props.updateData}
                                 addConnectionReference={props.addConnectionReferences}
                                 onOutputClicked={props.onOutputClicked}
+                                style={props.configNode.outputs[index].style}
                             >
                             </NodeIO>
                         </ul>

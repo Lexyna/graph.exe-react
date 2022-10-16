@@ -389,6 +389,7 @@ export interface ConnectionReferences {
 export interface ConnectionDot {
     x: () => number;
     y: () => number;
+    color: string
 }
 
 const createNodeArrayCopy = (nodes: ProtoEngineNode[]): ProtoEngineNode[] => {

@@ -1,7 +1,7 @@
 import { ConnectionDetails, CONNECTION_TYPE, EngineIO } from "graph.exe-core";
 import React, { FunctionComponent, MouseEvent, useEffect, useRef } from "react";
 import { ConnectionDot } from "../nodeEditor";
-import { ExtraProps } from "../ProtoTypes/ProtoIO";
+import { ExtraProps, ProtoIOStyle } from "../ProtoTypes/ProtoIO";
 import { io_ul_li_input_CSS, io_ul_li_i_input, io_ul_li_i_output, io_ul_li_output_CSS, io_ul_li_span_CSS } from "./NodeIOStyles";
 
 
@@ -53,7 +53,8 @@ export const NodeIO = (props: NodeIOProps<any, any>) => {
                     if (!ioRef.current) return -1;
                     return ioRef.current.getBoundingClientRect().y +
                         0.4 * ioRef.current.getBoundingClientRect().height;
-                }
+                },
+                color: props.style ? props.style.color : "rgba(0, 200, 100)"
             },
             props.isInput,
             props.index
@@ -79,7 +80,10 @@ export const NodeIO = (props: NodeIOProps<any, any>) => {
                 >{props.label}</span>)
             }
             <i
-                style={props.isInput ? io_ul_li_i_input : io_ul_li_i_output}
+                style={{
+                    ...props.isInput ? io_ul_li_i_input : io_ul_li_i_output,
+                    backgroundColor: props.style ? props.style.color : "rgba(0, 200, 100)"
+                }}
                 onContextMenu={onRightClick}
                 ref={ioRef}
                 onClick={onClick}
@@ -97,6 +101,7 @@ export interface NodeIOProps<T, K> {
     io: EngineIO<T, K>,
     extra: React.FC<ExtraProps<T, K>> | null
     label: string,
+    style?: ProtoIOStyle,
     updateData: (nodeId: string, input: boolean, index: number, data: any) => void,
     addConnectionReference: (ref: ConnectionDot, isInput: boolean, index: number) => void,
     onOutputClicked?: (ioDetails: ConnectionDetails) => void,
