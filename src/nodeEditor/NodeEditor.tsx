@@ -96,6 +96,14 @@ export const NodeEditor = (props: NodeEditorProps) => {
 
     const [nodes, setNodes] = useState<ProtoEngineNode[]>(Object.values(props.nodes))
 
+    const setNodeWrapper = (nodes: ProtoEngineNode[]) => {
+
+        Object.entries(props.nodes).forEach(([k, v]) => delete props.nodes[k])
+
+        nodes.forEach(n => props.nodes[n.id] = n);
+        setNodes(nodes)
+    }
+
     const [connectionReferences, setConnectionReferences] = useState<ConnectionReferences>({});
 
     const addConnectionReference = (nodeId: string) => (ref: ConnectionDot, isInput: boolean, index: number) => {
@@ -140,9 +148,8 @@ export const NodeEditor = (props: NodeEditorProps) => {
             }
         })
 
-        setConnections(connectionsCopy)
-        delete props.nodes[nodeId];
-        setNodes(newNodes);
+        setConnectionWrapper(connectionsCopy)
+        setNodeWrapper(newNodes);
         setConnectionReferences(referenceCopy)
     }
 
@@ -152,7 +159,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
 
         reorderedNodes.splice(index, 1);
         reorderedNodes.push(activeNode);
-        setNodes(reorderedNodes);
+        setNodeWrapper(reorderedNodes);
     }
 
     const updateNodePosition = (e: MouseEvent) => {
@@ -164,7 +171,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
             nodeCopies[index].position.x = e.pageX / zoom - dragOffset.x / zoom - panningOffset.x / zoom;
             nodeCopies[index].position.y = e.pageY / zoom - dragOffset.y / zoom - panningOffset.y / zoom;
         });
-        setNodes(nodeCopies);
+        setNodeWrapper(nodeCopies);
     }
 
     const updateData = (nodeId: string, input: boolean, index: number, data: any) => {
@@ -175,12 +182,12 @@ export const NodeEditor = (props: NodeEditorProps) => {
             if (input) nodeCopies[nodeIndex].inputs[index].data = data;
             else nodeCopies[nodeIndex].outputs[index].data = data;
         })
-        setNodes(nodeCopies);
+        setNodeWrapper(nodeCopies);
     }
 
     const addNode = (node: ProtoEngineNode) => {
         props.nodes[node.id] = node;
-        setNodes(nodes.concat(node));
+        setNodeWrapper(nodes.concat(node));
     }
 
     const [selectedOutputDetails, setSelectedOutputId] = useState<ConnectionDetails | null>(null);
@@ -214,6 +221,8 @@ export const NodeEditor = (props: NodeEditorProps) => {
 
     const setConnectionWrapper = (cons: EngineConnections) => {
 
+        console.log("con wrapper: ", cons);
+
         Object.entries(props.connections.input).forEach(([k, v]) => {
             delete props.connections.input[k]
         })
@@ -233,8 +242,10 @@ export const NodeEditor = (props: NodeEditorProps) => {
         if (selectedOutputDetails === null) {
             const existingConnections: ConnectionDetails[] = connectionFinder(inputDetails, connections);
             if (existingConnections.length === 0) return;
-            splitter(existingConnections[0], inputDetails, connections);
+            const connectionsCopy = createConnectionsCopy(connections);
+            splitter(existingConnections[0], inputDetails, connectionsCopy);
             setSelectedOutputId(existingConnections[0]);
+            setConnectionWrapper(connectionsCopy);
             return;
         }
 
