@@ -10,7 +10,7 @@ export const computeBezierCurve = (x1: number, y1: number, x2: number, y2: numbe
         (x2 - dif) + "," + y2 + " " + x2 + "," + y2;
 }
 
-export const findIO = (io: ConnectionDetails, nodes: ProtoEngineNode[]): EngineIO<any, any> => {
+export const findIO = (io: ConnectionDetails, nodes: ProtoEngineNode[], isInput: boolean): EngineIO<any, any> => {
     let ret: EngineIO<any, any> = {
         data: null,
         mapping: CON_MAPPING.SINGLE,
@@ -19,7 +19,7 @@ export const findIO = (io: ConnectionDetails, nodes: ProtoEngineNode[]): EngineI
     };
     nodes.forEach(n => {
         if (n.id === io.nodeId)
-            ret = n.inputs[io.index];
+            isInput ? ret = n.inputs[io.index] : ret = n.outputs[io.index];
     })
     return ret;
 }

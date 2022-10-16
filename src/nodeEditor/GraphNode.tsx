@@ -105,7 +105,7 @@ export const GraphNode = (props: NodeProps) => {
                                 nodeId={props.engineNode.id}
                                 index={index}
                                 isInput={false}
-                                label={props.configNode.inputs[index].label}
+                                label={props.configNode.outputs[index].label}
                                 io={io}
                                 extra={props.configNode.outputs[index].extra}
                                 updateData={props.updateData}

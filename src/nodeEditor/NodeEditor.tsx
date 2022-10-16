@@ -249,8 +249,8 @@ export const NodeEditor = (props: NodeEditorProps) => {
             return;
         }
 
-        let input: EngineIO<any, any> = findIO(inputDetails, nodes);
-        let output: EngineIO<any, any> = findIO(selectedOutputDetails, nodes);
+        let input: EngineIO<any, any> = findIO(inputDetails, nodes, true);
+        let output: EngineIO<any, any> = findIO(selectedOutputDetails, nodes, false);
 
         //test if the connectionType is valid
         if (input.type !== output.type) return;
