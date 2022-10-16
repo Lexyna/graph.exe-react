@@ -212,6 +212,22 @@ export const NodeEditor = (props: NodeEditorProps) => {
 
     const [connections, setConnections] = useState<EngineConnections>(props.connections)
 
+    const setConnectionWrapper = (cons: EngineConnections) => {
+
+        Object.entries(props.connections.input).forEach(([k, v]) => {
+            delete props.connections.input[k]
+        })
+
+        Object.entries(props.connections.output).forEach(([k, v]) => {
+            delete props.connections.output[k]
+        })
+
+        Object.entries(cons.input).forEach(([k, v]) => props.connections.input[k] = v)
+        Object.entries(cons.output).forEach(([k, v]) => props.connections.output[k] = v)
+
+        setConnections(cons);
+    }
+
     const onConnect = (inputDetails: ConnectionDetails) => {
         //Possibly refactor this into the core as conditionalConnector
         if (selectedOutputDetails === null) {
@@ -236,7 +252,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
             const connectionsCopy = createConnectionsCopy(connections);
             connector(selectedOutputDetails, inputDetails, connectionsCopy);
             removePreviewConnection();
-            setConnections(connectionsCopy);
+            setConnectionWrapper(connectionsCopy);
             return;
         }
 
@@ -246,7 +262,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
             splitter(existingConnections[0], inputDetails, connections);
             connector(selectedOutputDetails, inputDetails, connectionsCopy);
             removePreviewConnection();
-            setConnections(connectionsCopy);
+            setConnectionWrapper(connectionsCopy);
             return;
         }
 
@@ -254,14 +270,14 @@ export const NodeEditor = (props: NodeEditorProps) => {
         const connectionsCopy = createConnectionsCopy(connections);
         connector(selectedOutputDetails, inputDetails, connectionsCopy);
         removePreviewConnection();
-        setConnections(connectionsCopy);
+        setConnectionWrapper(connectionsCopy);
 
     }
 
     const removeConnection = (inputDetails: ConnectionDetails, outputDetails: ConnectionDetails) => {
         const connectionsCopy = createConnectionsCopy(connections);
         splitter(outputDetails, inputDetails, connectionsCopy);
-        setConnections(connectionsCopy);
+        setConnectionWrapper(connectionsCopy);
     }
 
     return (
