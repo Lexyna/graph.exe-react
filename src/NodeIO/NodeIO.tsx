@@ -54,7 +54,7 @@ export const NodeIO = (props: NodeIOProps<any, any>) => {
                     return ioRef.current.getBoundingClientRect().y +
                         0.4 * ioRef.current.getBoundingClientRect().height;
                 },
-                color: props.style ? props.style.color : "rgba(0, 200, 100)"
+                color: props.style ? props.style.color : "white"
             },
             props.isInput,
             props.index
@@ -82,7 +82,7 @@ export const NodeIO = (props: NodeIOProps<any, any>) => {
             <i
                 style={{
                     ...props.isInput ? io_ul_li_i_input : io_ul_li_i_output,
-                    backgroundColor: props.style ? props.style.color : "rgba(0, 200, 100)"
+                    backgroundColor: props.style ? props.style.color : "white"
                 }}
                 onContextMenu={onRightClick}
                 ref={ioRef}
