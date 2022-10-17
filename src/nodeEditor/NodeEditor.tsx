@@ -297,7 +297,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
         //replace existing connection
         if (existingConnections.length === 1 && mapping === CON_MAPPING.SINGLE) {
             const connectionsCopy = createConnectionsCopy(connections);
-            splitter(existingConnections[0], inputDetails, connections);
+            splitter(existingConnections[0], inputDetails, connectionsCopy);
             connector(selectedOutputDetails, inputDetails, connectionsCopy);
             removePreviewConnection();
             setConnectionWrapper(connectionsCopy);
