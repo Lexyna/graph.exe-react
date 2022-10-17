@@ -28,9 +28,9 @@ const nodeEditorCSS: CSSProperties = {
 }
 
 enum graphStatus {
-    updated = "#befdb7",
+    updated = "##00dd00",
     computing = "#d8d8d8",
-    failed = "#ff6f1d",
+    failed = "#dd0000",
 }
 
 export const NodeEditor = (props: NodeEditorProps) => {
