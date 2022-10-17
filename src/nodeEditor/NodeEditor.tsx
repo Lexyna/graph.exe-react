@@ -17,11 +17,29 @@ const nodeEditorCSS: CSSProperties = {
     overflow: "hidden"
 }
 
+enum graphStatus {
+    updated = "Updated",
+    updating = "Updating"
+}
+
+const privateStateTrigger = (fn1: () => void, callback: () => void) => {
+    fn1();
+    callback();
+}
+
 export const NodeEditor = (props: NodeEditorProps) => {
 
+    const [status, setStatus] = useState<graphStatus>(graphStatus.updated);
+
+    const setStatusUpdated = () => {
+        setStatus(graphStatus.updated);
+    }
+
     const triggerGraphUpdate = () => {
-        if (props.update !== undefined)
-            props.update();
+        if (props.update !== undefined) {
+            setStatus(graphStatus.updating);
+            privateStateTrigger(props.update, setStatusUpdated);
+        }
     }
 
     const editorRef = useRef<HTMLDivElement>(null);
