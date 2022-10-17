@@ -1,4 +1,4 @@
-import { ConnectionDetails, connectionFinder, connector, EngineConnections, EngineIO, extractor, splitter } from "graph.exe-core";
+import { ConnectionDetails, connectionFinder, connector, EngineConnections, EngineIO, executeGraph, extractor, splitter } from "graph.exe-core";
 import { NodePorts } from "graph.exe-core/dist/cjs/core/connections/Extractor";
 import { CON_MAPPING } from "graph.exe-core/dist/cjs/core/IO/IOMapping";
 import React, { CSSProperties, MouseEvent, useRef, useState, WheelEvent } from "react";
@@ -9,6 +9,16 @@ import { computeBezierCurve, findIO } from "../Utils/utils";
 import { Offset } from "../Utils/utilTypes";
 import { GraphNode } from "./GraphNode";
 
+const dotCSS: CSSProperties = {
+    height: "0.8rem",
+    width: "0.8rem",
+    borderRadius: "50%",
+    display: "inline-block",
+    position: "absolute",
+    bottom: "0.1rem",
+    right: "0.1rem"
+}
+
 const nodeEditorCSS: CSSProperties = {
     height: "inherit",
     width: "inherit",
@@ -18,27 +28,20 @@ const nodeEditorCSS: CSSProperties = {
 }
 
 enum graphStatus {
-    updated = "Updated",
-    updating = "Updating"
-}
-
-const privateStateTrigger = (fn1: () => void, callback: () => void) => {
-    fn1();
-    callback();
+    updated = "#befdb7",
+    computing = "#d8d8d8",
+    failed = "#ff6f1d",
 }
 
 export const NodeEditor = (props: NodeEditorProps) => {
 
     const [status, setStatus] = useState<graphStatus>(graphStatus.updated);
 
-    const setStatusUpdated = () => {
-        setStatus(graphStatus.updated);
-    }
-
     const triggerGraphUpdate = () => {
-        if (props.update !== undefined) {
-            setStatus(graphStatus.updating);
-            privateStateTrigger(props.update, setStatusUpdated);
+        if (props.entryId !== undefined && (props.entryId in props.nodes)) {
+            setStatus(graphStatus.computing)
+            const [valid] = executeGraph(props.config, props.nodes, props.connections, props.entryId, false);
+            valid ? setStatus(graphStatus.updated) : setStatus(graphStatus.failed);
         }
     }
 
@@ -380,8 +383,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
                     ></GraphNode>
                 )
             })}
-            {status === graphStatus.updated ?
-                <span style={{ position: "absolute" }}>Updated</span> : <span style={{ position: "absolute" }}>Updating</span>}
+            {props.entryId !== undefined ? <span style={{ ...dotCSS, backgroundColor: status }}></span> : null}
         </div>
     )
 }
@@ -396,7 +398,7 @@ export interface NodeEditorProps {
     config: ProtoNodeDict,
     nodes: ProtoEngineNodeDict,
     connections: EngineConnections,
-    update?: () => void
+    entryId?: string
 }
 export interface ContextMenuOptions {
     show: boolean,
