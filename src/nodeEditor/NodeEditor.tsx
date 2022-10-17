@@ -284,9 +284,17 @@ export const NodeEditor = (props: NodeEditorProps) => {
         const mapping: CON_MAPPING = props.nodes[inputDetails.nodeId].inputs[inputDetails.index].mapping;
         const existingConnections: ConnectionDetails[] = connectionFinder(inputDetails, connections);
 
+        const connectionsCopy = createConnectionsCopy(connections);
+
+        //if output mapping is SINGLE, remove previous connection
+        if (output.mapping === CON_MAPPING.SINGLE) {
+            const prevConnections: ConnectionDetails[] = connectionFinder(selectedOutputDetails, connectionsCopy);
+            prevConnections.forEach(con => splitter(selectedOutputDetails, con, connectionsCopy))
+        }
+
+
         //create new connection
         if (existingConnections.length === 0 && mapping === CON_MAPPING.SINGLE) {
-            const connectionsCopy = createConnectionsCopy(connections);
             connector(selectedOutputDetails, inputDetails, connectionsCopy);
             removePreviewConnection();
             setConnectionWrapper(connectionsCopy);
@@ -296,7 +304,6 @@ export const NodeEditor = (props: NodeEditorProps) => {
 
         //replace existing connection
         if (existingConnections.length === 1 && mapping === CON_MAPPING.SINGLE) {
-            const connectionsCopy = createConnectionsCopy(connections);
             splitter(existingConnections[0], inputDetails, connectionsCopy);
             connector(selectedOutputDetails, inputDetails, connectionsCopy);
             removePreviewConnection();
@@ -306,7 +313,6 @@ export const NodeEditor = (props: NodeEditorProps) => {
         }
 
         //add connection (multi connection)
-        const connectionsCopy = createConnectionsCopy(connections);
         connector(selectedOutputDetails, inputDetails, connectionsCopy);
         removePreviewConnection();
         setConnectionWrapper(connectionsCopy);
