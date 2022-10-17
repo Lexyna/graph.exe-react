@@ -292,7 +292,6 @@ export const NodeEditor = (props: NodeEditorProps) => {
             prevConnections.forEach(con => splitter(selectedOutputDetails, con, connectionsCopy))
         }
 
-
         //create new connection
         if (existingConnections.length === 0 && mapping === CON_MAPPING.SINGLE) {
             connector(selectedOutputDetails, inputDetails, connectionsCopy);
@@ -381,6 +380,8 @@ export const NodeEditor = (props: NodeEditorProps) => {
                     ></GraphNode>
                 )
             })}
+            {status === graphStatus.updated ?
+                <span style={{ position: "absolute" }}>Updated</span> : <span style={{ position: "absolute" }}>Updating</span>}
         </div>
     )
 }
