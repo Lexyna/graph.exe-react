@@ -15,8 +15,8 @@ const dotCSS: CSSProperties = {
     borderRadius: "50%",
     display: "inline-block",
     position: "absolute",
-    bottom: "0.1rem",
-    right: "0.1rem"
+    bottom: "0.3rem",
+    right: "0.3rem"
 }
 
 const nodeEditorCSS: CSSProperties = {
