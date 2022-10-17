@@ -86,7 +86,7 @@ export const GraphNode = (props: NodeProps) => {
                                 index={index}
                                 isInput={true}
                                 label={
-                                    props.debugMode ? props.configNode.inputs[index].label :
+                                    !props.debugMode ? props.configNode.inputs[index].label :
                                         props.configNode.inputs[index].label + "(" + JSON.stringify(props.engineNode.inputs[index].value) + ")"}
                                 io={io}
                                 extra={props.configNode.inputs[index].extra}
@@ -109,7 +109,7 @@ export const GraphNode = (props: NodeProps) => {
                                 index={index}
                                 isInput={false}
                                 label={
-                                    props.debugMode ? props.configNode.outputs[index].label :
+                                    !props.debugMode ? props.configNode.outputs[index].label :
                                         props.configNode.outputs[index].label + "(" + JSON.stringify(props.engineNode.outputs[index].value) + ")"}
                                 io={io}
                                 extra={props.configNode.outputs[index].extra}
