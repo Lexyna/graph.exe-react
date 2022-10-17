@@ -6,24 +6,24 @@ import { ProtoEngineNode, ProtoNode } from "../ProtoTypes/ProtoNode"
 import { Offset } from "../Utils/utilTypes"
 import { ConnectionDot } from "./NodeEditor"
 
-const headerCSS: CSSProperties = {
-    backgroundColor: "#297286BB",
-    display: "block",
-    color: "white",
-    borderRadius: "5px 5px 0px 0px",
-    textAlign: "left",
-    cursor: "pointer",
-    fontFamily: "Courier New', Courier, monospace",
-    padding: "2px 12px 5px",
-    userSelect: "none",
-    WebkitTouchCallout: "none",
-    WebkitUserSelect: "none",
-    KhtmlUserSelect: "none",
-    MozUserSelect: "none",
-    msUserSelect: "none"
-}
-
 export const GraphNode = (props: NodeProps) => {
+
+    const headerCSS: CSSProperties = {
+        backgroundColor: props.configNode.style?.headerColor ? props.configNode.style.headerColor : "#297286BB",
+        display: "block",
+        color: "white",
+        borderRadius: "5px 5px 0px 0px",
+        textAlign: "left",
+        cursor: "pointer",
+        fontFamily: "Courier New', Courier, monospace",
+        padding: "2px 12px 5px",
+        userSelect: "none",
+        WebkitTouchCallout: "none",
+        WebkitUserSelect: "none",
+        KhtmlUserSelect: "none",
+        MozUserSelect: "none",
+        msUserSelect: "none"
+    }
 
     const nodeCSS: CSSProperties = {
         display: "block",
@@ -40,7 +40,7 @@ export const GraphNode = (props: NodeProps) => {
         left: props.position.x - props.editorOffset.x + "px",
         transform: `scale(${props.zoom})`,
         transformOrigin: "top left",
-        backgroundColor: "rgba(63, 63, 63, .7)"
+        backgroundColor: props.configNode.style?.bodyColor ? props.configNode.style.bodyColor : "rgba(63, 63, 63, .7)"
     }
 
     const onDrag = (e: MouseEvent) => {

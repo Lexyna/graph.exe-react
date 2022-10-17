@@ -13,6 +13,12 @@ export interface ProtoNode extends ConfigNode {
     inputs: ProtoIO<any, any>[];
     outputs: ProtoIO<any, any>[];
     private?: boolean,
+    style?: ProtoNodeStyle
+}
+
+export interface ProtoNodeStyle {
+    headerColor?: string,
+    bodyColor?: string
 }
 
 export interface ProtoNodeDict {
