@@ -85,7 +85,9 @@ export const GraphNode = (props: NodeProps) => {
                                 nodeId={props.engineNode.id}
                                 index={index}
                                 isInput={true}
-                                label={props.configNode.inputs[index].label + "(" + props.engineNode.inputs[index].value + ")"}
+                                label={
+                                    props.debugMode ? props.configNode.inputs[index].label :
+                                        props.configNode.inputs[index].label + "(" + JSON.stringify(props.engineNode.inputs[index].value) + ")"}
                                 io={io}
                                 extra={props.configNode.inputs[index].extra}
                                 updateData={props.updateData}
@@ -106,7 +108,9 @@ export const GraphNode = (props: NodeProps) => {
                                 nodeId={props.engineNode.id}
                                 index={index}
                                 isInput={false}
-                                label={props.configNode.outputs[index].label + "(" + props.engineNode.outputs[index].value + ")"}
+                                label={
+                                    props.debugMode ? props.configNode.outputs[index].label :
+                                        props.configNode.outputs[index].label + "(" + JSON.stringify(props.engineNode.outputs[index].value) + ")"}
                                 io={io}
                                 extra={props.configNode.outputs[index].extra}
                                 updateData={props.updateData}
@@ -130,12 +134,13 @@ export interface NodeProps {
     index: number,
     zoom: number,
     position: Offset,
-    editorOffset: Offset
+    editorOffset: Offset,
+    debugMode: boolean,
     updateData: (id: string, input: boolean, index: number, data: any) => void,
     dragHandler: (id: string, x: number, y: number) => void,
     deleteNode: (id: string) => void,
     reorderNode: (index: number) => void,
     addConnectionReferences: (ref: ConnectionDot, isInput: boolean, index: number) => void,
-    onOutputClicked: (ioDetails: ConnectionDetails) => void
-    onInputClicked: (inputDetails: ConnectionDetails) => void
+    onOutputClicked: (ioDetails: ConnectionDetails) => void,
+    onInputClicked: (inputDetails: ConnectionDetails) => void,
 }

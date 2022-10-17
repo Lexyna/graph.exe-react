@@ -380,6 +380,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
                         addConnectionReferences={addConnectionReference(node.id)}
                         onOutputClicked={onOutputClicked}
                         onInputClicked={onConnect}
+                        debugMode={props.debugMode}
                     ></GraphNode>
                 )
             })}
@@ -393,11 +394,14 @@ export const NodeEditor = (props: NodeEditorProps) => {
  * @field nodes: EngineNodes use to display and store data and 
  * @field connections: EngineNode connections
  * @field update: Optional callback to a function that will trigger every time the graph changes
+ * @field debugMode: If true, will display a stringified version of io Ports value (Only applies to non custom io Ports)
+ * @field entryId: if provided (& valid) will update the Graph with each change. Display's current Graphs status in the bottom right
  */
 export interface NodeEditorProps {
     config: ProtoNodeDict,
     nodes: ProtoEngineNodeDict,
     connections: EngineConnections,
+    debugMode: boolean,
     entryId?: string
 }
 export interface ContextMenuOptions {
