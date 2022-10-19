@@ -3,7 +3,7 @@ import { NodePorts } from "graph.exe-core/dist/cjs/core/connections/Extractor";
 import { CON_MAPPING } from "graph.exe-core/dist/cjs/core/IO/IOMapping";
 import React, { CSSProperties, MouseEvent, useRef, useState, WheelEvent } from "react";
 import { ConnectionStage } from "../Connections/ConnectionsStage";
-import { EditorContextMenu } from "../ContextMenu/EditorContextMenu";
+import { EditorContextMenu } from "../Menu/EditorContextMenu";
 import { ProtoEngineNode, ProtoEngineNodeDict, ProtoNodeDict } from "../ProtoTypes/ProtoNode";
 import { computeBezierCurve, findIO } from "../Utils/utils";
 import { Offset } from "../Utils/utilTypes";

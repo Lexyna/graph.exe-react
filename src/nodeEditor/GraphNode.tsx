@@ -27,7 +27,6 @@ export const GraphNode = (props: NodeProps) => {
 
     const nodeCSS: CSSProperties = {
         display: "block",
-        maxWidth: "15rem",
         minWidth: "7rem",
         width: "auto",
         height: "auto",

@@ -1,5 +1,6 @@
 import { ConnectionDetails, CONNECTION_TYPE, EngineIO } from "graph.exe-core";
-import React, { FunctionComponent, MouseEvent, useEffect, useRef } from "react";
+import React, { FunctionComponent, MouseEvent, useEffect, useRef, useState } from "react";
+import { ValuePreview } from "../Menu/ValuePreview";
 import { ConnectionDot } from "../nodeEditor";
 import { ExtraProps, ProtoIOStyle } from "../ProtoTypes/ProtoIO";
 import { io_ul_li_input_CSS, io_ul_li_i_input, io_ul_li_i_output, io_ul_li_output_CSS, io_ul_li_span_CSS } from "./NodeIOStyles";
@@ -8,6 +9,32 @@ import { io_ul_li_input_CSS, io_ul_li_i_input, io_ul_li_i_output, io_ul_li_outpu
 
 export const NodeIO = (props: NodeIOProps<any, any>) => {
     const ioRef = useRef<HTMLUListElement>(null);
+    const labelRef = useRef<HTMLSpanElement>(null);
+
+    const [previewState, setPreviewState] = useState<previewState>({
+        data: null,
+        value: null,
+        show: false,
+        x: 0
+    })
+
+    const [delayHandler, setDelayHandler] = useState<any>(null);
+
+    const showPreview = (e: MouseEvent) => {
+        setDelayHandler(setTimeout(() => {
+            setPreviewState({
+                data: props.io.data,
+                value: props.io.value,
+                show: true,
+                x: labelRef.current ? e.clientX - labelRef.current.getBoundingClientRect().left : 0
+            })
+        }, 600))
+    }
+
+    const hidePreview = () => {
+        clearTimeout(delayHandler);
+        setPreviewState({ ...previewState, show: false });
+    }
 
     const onRightClick = (e: MouseEvent) => {
         e.preventDefault();
@@ -76,8 +103,14 @@ export const NodeIO = (props: NodeIOProps<any, any>) => {
                     />
                 </div> :
                 (<span
+                    ref={labelRef}
                     style={io_ul_li_span_CSS}
-                >{props.label}</span>)
+                    onMouseEnter={e => showPreview(e)}
+                    onMouseLeave={hidePreview}
+                >
+                    {props.label}
+                    {previewState.show ? <ValuePreview value={props.io.value} data={props.io.data} x={previewState.x} /> : null}
+                </span>)
             }
             <i
                 style={{
@@ -107,4 +140,11 @@ export interface NodeIOProps<T, K> {
     onOutputClicked?: (ioDetails: ConnectionDetails) => void,
     onInputClicked?: (inputDetails: ConnectionDetails) => void,
     children: React.ReactNode
+}
+
+interface previewState {
+    data: any,
+    value: any,
+    show: boolean,
+    x: number
 }
