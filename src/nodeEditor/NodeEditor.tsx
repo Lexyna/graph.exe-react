@@ -249,8 +249,6 @@ export const NodeEditor = (props: NodeEditorProps) => {
 
     const setConnectionWrapper = (cons: EngineConnections) => {
 
-        console.log("con wrapper: ", cons);
-
         Object.entries(props.connections.input).forEach(([k, v]) => {
             delete props.connections.input[k]
         })
@@ -263,6 +261,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
         Object.entries(cons.output).forEach(([k, v]) => props.connections.output[k] = v)
 
         setConnections(cons);
+        triggerGraphUpdate();
     }
 
     const onConnect = (inputDetails: ConnectionDetails) => {
@@ -274,7 +273,6 @@ export const NodeEditor = (props: NodeEditorProps) => {
             splitter(existingConnections[0], inputDetails, connectionsCopy);
             setSelectedOutputId(existingConnections[0]);
             setConnectionWrapper(connectionsCopy);
-            triggerGraphUpdate()
             return;
         }
 
@@ -300,7 +298,6 @@ export const NodeEditor = (props: NodeEditorProps) => {
             connector(selectedOutputDetails, inputDetails, connectionsCopy);
             removePreviewConnection();
             setConnectionWrapper(connectionsCopy);
-            triggerGraphUpdate()
             return;
         }
 
@@ -310,7 +307,6 @@ export const NodeEditor = (props: NodeEditorProps) => {
             connector(selectedOutputDetails, inputDetails, connectionsCopy);
             removePreviewConnection();
             setConnectionWrapper(connectionsCopy);
-            triggerGraphUpdate()
             return;
         }
 
@@ -318,7 +314,6 @@ export const NodeEditor = (props: NodeEditorProps) => {
         connector(selectedOutputDetails, inputDetails, connectionsCopy);
         removePreviewConnection();
         setConnectionWrapper(connectionsCopy);
-        triggerGraphUpdate()
     }
 
     const removeConnection = (inputDetails: ConnectionDetails, outputDetails: ConnectionDetails) => {
