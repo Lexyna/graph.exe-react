@@ -3,6 +3,7 @@ import { NodePorts } from "graph.exe-core/dist/cjs/core/connections/Extractor";
 import { CON_MAPPING } from "graph.exe-core/dist/cjs/core/IO/IOMapping";
 import React, { CSSProperties, MouseEvent, useEffect, useLayoutEffect, useRef, useState, WheelEvent } from "react";
 import { ConnectionStage } from "../Connections/ConnectionsStage";
+import { GridOptions } from "../Connections/Grid";
 import { EditorContextMenu } from "../Menu/EditorContextMenu";
 import { ProtoEngineNode, ProtoEngineNodeDict, ProtoNodeDict } from "../ProtoTypes/ProtoNode";
 import { computeBezierCurve, findIO } from "../Utils/utils";
@@ -374,6 +375,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
                 connections={connections}
                 previewPath={previewConnection}
                 deleteConnection={removeConnection}
+                gridStyle={props.gridStyle}
             ></ConnectionStage>
             {nodes.map((node: ProtoEngineNode, index: number) => {
                 return (
@@ -417,7 +419,8 @@ export interface NodeEditorProps {
     nodes: ProtoEngineNodeDict,
     connections: EngineConnections,
     debugMode: boolean,
-    entryId?: string
+    entryId?: string,
+    gridStyle?: GridOptions
 }
 export interface ContextMenuOptions {
     show: boolean,

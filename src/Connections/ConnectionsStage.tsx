@@ -4,16 +4,16 @@ import { ConnectionReferences } from "../nodeEditor";
 import { computeBezierCurve } from "../Utils/utils";
 import { clientDimension, Offset } from "../Utils/utilTypes";
 import { Connection } from "./Connection";
-import { Grid } from "./Grid";
-
-const connectionStageCSS: CSSProperties = {
-    width: "100%",
-    backgroundColor: "rgb(38,38, 38)"
-}
+import { Grid, GridOptions } from "./Grid";
 
 export const ConnectionStage = (props: ConnectionStageProps) => {
 
     const stageRef = useRef<SVGSVGElement>(null);
+
+    const connectionStageCSS: CSSProperties = {
+        width: "100%",
+        backgroundColor: props.gridStyle?.backgroundColor ? props.gridStyle.backgroundColor : "rgb(38,38, 38)"
+    }
 
     const [clientDimensions, setClientDimensions] = useState<clientDimension>({
         width: 0,
@@ -61,6 +61,7 @@ export const ConnectionStage = (props: ConnectionStageProps) => {
                 offsetX={props.panningOffset.x}
                 offsetY={props.panningOffset.y}
                 editorOffset={props.editorOffset}
+                style={props.gridStyle}
                 zoom={props.zoom}
             ></Grid>
             {props.connections ? Object.entries(props.connections.input).map(([key, value]) => {
@@ -102,5 +103,6 @@ export interface ConnectionStageProps {
     connections: EngineConnections,
     connectionReferences: ConnectionReferences,
     previewPath: string,
-    deleteConnection: (inputDetails: ConnectionDetails, outputDetails: ConnectionDetails) => void
+    deleteConnection: (inputDetails: ConnectionDetails, outputDetails: ConnectionDetails) => void,
+    gridStyle?: GridOptions
 }
