@@ -50,6 +50,7 @@ const generateLineArrays = (gridPadding: number, lineWidth: number, lineHeight: 
     const boldLines: line[] = [];
 
     let boldLine = boldLineSpacing;
+    const boldLineModulus = boldLineSpacing + 1;
 
     for (let i = -gridPadding; i < lineWidth + editorOffsetX; i += gridPadding) {
         boldLine++;
@@ -62,17 +63,17 @@ const generateLineArrays = (gridPadding: number, lineWidth: number, lineHeight: 
             color: defaultColor
         })
 
-        if (boldLine % (boldLineSpacing + 1) == 0)
+        if (boldLineSpacing !== 0 && boldLine % boldLineModulus == 0)
             boldLines.push({
-                startX: i + (offsetX % (8 * gridPadding)) - editorOffsetX,
+                startX: i + (offsetX % (boldLineModulus * gridPadding)) - editorOffsetX,
                 startY: 0,
-                endX: i + (offsetX % (8 * gridPadding)) - editorOffsetX,
+                endX: i + (offsetX % (boldLineModulus * gridPadding)) - editorOffsetX,
                 endY: lineHeight,
                 color: boldColor
             })
     }
 
-    boldLine = 7;
+    boldLine = boldLineSpacing;
 
     for (let i = -gridPadding; i < lineHeight + editorOffsetY; i += gridPadding) {
         boldLine++;
@@ -85,12 +86,12 @@ const generateLineArrays = (gridPadding: number, lineWidth: number, lineHeight: 
             color: defaultColor
         })
 
-        if (boldLine % (boldLineSpacing + 1) == 0)
+        if (boldLineSpacing !== 0 && boldLine % boldLineModulus == 0)
             boldLines.push({
                 startX: 0,
-                startY: i + (offsetY % (8 * gridPadding)) - editorOffsetY,
+                startY: i + (offsetY % (boldLineModulus * gridPadding)) - editorOffsetY,
                 endX: lineWidth,
-                endY: i + (offsetY % (8 * gridPadding)) - editorOffsetY,
+                endY: i + (offsetY % (boldLineModulus * gridPadding)) - editorOffsetY,
                 color: boldColor
             })
     }
