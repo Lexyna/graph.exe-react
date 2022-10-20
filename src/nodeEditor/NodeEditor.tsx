@@ -1,7 +1,7 @@
 import { ConnectionDetails, connectionFinder, connector, EngineConnections, EngineIO, executeGraph, extractor, splitter } from "graph.exe-core";
 import { NodePorts } from "graph.exe-core/dist/cjs/core/connections/Extractor";
 import { CON_MAPPING } from "graph.exe-core/dist/cjs/core/IO/IOMapping";
-import React, { CSSProperties, MouseEvent, useRef, useState, WheelEvent } from "react";
+import React, { CSSProperties, MouseEvent, useEffect, useLayoutEffect, useRef, useState, WheelEvent } from "react";
 import { ConnectionStage } from "../Connections/ConnectionsStage";
 import { EditorContextMenu } from "../Menu/EditorContextMenu";
 import { ProtoEngineNode, ProtoEngineNodeDict, ProtoNodeDict } from "../ProtoTypes/ProtoNode";
@@ -73,6 +73,25 @@ export const NodeEditor = (props: NodeEditorProps) => {
             y: panningOffset.y + e.movementY
         })
     }
+
+    const [editorOffset, setEditorOffset] = useState<Offset>({ x: 0, y: 0 })
+
+    const updateEditorOffset = () => {
+        if (!editorRef.current) return;
+        setEditorOffset({
+            x: editorRef.current.getBoundingClientRect().x,
+            y: editorRef.current.getBoundingClientRect().y
+        })
+    }
+
+    useLayoutEffect(() => {
+        updateEditorOffset();
+    }, [panningOffset, zoom])
+
+    useEffect(() => {
+        window.addEventListener("resize", updateEditorOffset)
+        return () => window.removeEventListener("resize", updateEditorOffset);
+    }, [])
 
     const onMouseMoveHandler = (e: MouseEvent) => {
         updateNodePosition(e);
@@ -229,9 +248,10 @@ export const NodeEditor = (props: NodeEditorProps) => {
 
         setPreviewConnection(
             computeBezierCurve(
-                connectionReferences[selectedOutputDetails.ioId].x() / zoom,
-                connectionReferences[selectedOutputDetails.ioId].y() / zoom,
-                x2 / zoom, y2 / zoom
+                connectionReferences[selectedOutputDetails.ioId].x() / zoom - editorOffset.x / zoom,
+                connectionReferences[selectedOutputDetails.ioId].y() / zoom - editorOffset.y / zoom,
+                x2 / zoom - editorOffset.x / zoom,
+                y2 / zoom - editorOffset.y / zoom
             )
         )
     }
@@ -347,7 +367,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
             ></EditorContextMenu>
             <ConnectionStage
                 zoom={zoom}
-                editorOffset={{ x: 0, y: 0 }}
+                editorOffset={editorOffset}
                 panningOffset={panningOffset}
                 showContextMenu={showContextMenu}
                 connectionReferences={connectionReferences}
@@ -362,7 +382,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
                         index={index}
                         engineNode={node}
                         configNode={props.config[node.configId]}
-                        editorOffset={{ x: 0, y: 0 }}
+                        editorOffset={editorOffset}
                         zoom={zoom}
                         position={{
                             x: node.position.x * zoom + panningOffset.x,
