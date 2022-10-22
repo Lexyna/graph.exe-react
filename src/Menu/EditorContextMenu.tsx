@@ -31,12 +31,14 @@ const contextMenuSearchBar: CSSProperties = {
 }
 
 const contextMenuItem: CSSProperties = {
+    width: "15rem",
     borderBottom: "1px solid gray",
     borderRight: "1px solid gray",
     overflowWrap: "normal"
 }
 
 const contextMenuItemSelected: CSSProperties = {
+    width: "15rem",
     borderBottom: "1px solid gray",
     borderRight: "1px solid gray",
     overflowWrap: "normal",
@@ -140,7 +142,7 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
         const matches: ProtoNode[] = [];
 
         Object.entries(props.config).forEach(([id, node]) => {
-            if (node.name.toLocaleLowerCase().includes(searchText.toLocaleLowerCase()))
+            if (!node.private && node.name.toLocaleLowerCase().includes(searchText.toLocaleLowerCase()))
                 matches.push(node);
         })
 
