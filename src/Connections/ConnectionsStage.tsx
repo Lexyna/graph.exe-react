@@ -66,6 +66,8 @@ export const ConnectionStage = (props: ConnectionStageProps) => {
             ></Grid>
             {props.connections ? Object.entries(props.connections.input).map(([key, value]) => {
                 return value.connections.map((details) => {
+                    if (!(details.ioId in props.connectionReferences) || !(value.self.ioId in props.connectionReferences))
+                        return null;
                     return <Connection
                         key={details.ioId}
                         color={props.connectionReferences[details.ioId].color}
