@@ -193,6 +193,7 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
                                     key={listId}
                                     onClick={e => addNodeToEditor(e.clientX, e.clientY, node)}
                                     onMouseEnter={() => setSelectedIndex(index)}
+                                    onWheel={e => { e.preventDefault(); e.stopPropagation(); }}
                                 >
                                     <header
                                         style={contextMenuItemHeader}
