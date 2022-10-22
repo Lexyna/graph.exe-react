@@ -24,7 +24,7 @@ const contextMenuSearchBar: CSSProperties = {
     overflowWrap: "normal",
     fontSize: "x-large",
     backgroundColor: "rgba(63, 63, 63, 1)",
-    width: "16rem",
+    width: "15rem",
     border: "1px solid gray !important",
     borderRadius: "1rem 0rem 0rem 0rem",
     paddingBottom: "0.3rem"

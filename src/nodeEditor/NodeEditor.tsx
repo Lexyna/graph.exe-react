@@ -236,6 +236,7 @@ export const NodeEditor = (props: NodeEditorProps) => {
     const addNode = (node: ProtoEngineNode) => {
         props.nodes[node.id] = node;
         setNodeWrapper(nodes.concat(node));
+        setContextMenuOptions({ ...contextMenuOptions, show: false })
     }
 
     const [selectedOutputDetails, setSelectedOutputId] = useState<ConnectionDetails | null>(null);
