@@ -96,7 +96,11 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
         switch (e.key) {
             case "ArrowUp": setSelectedIndex((index) => index > 0 ? index - 1 : index); break;
             case "ArrowDown": setSelectedIndex((index) => index < nodes.length - 1 ? index + 1 : index); break;
-            case "Enter": break;
+            case "Enter": if (contextMenuRef.current && nodes[selectedIndex]) addNodeToEditor(
+                contextMenuRef.current.getBoundingClientRect().x,
+                contextMenuRef.current.getBoundingClientRect().y,
+                nodes[selectedIndex]
+            ); break;
             default: break;
         }
     }
