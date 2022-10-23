@@ -265,7 +265,11 @@ const createNodeCategories = (config: ProtoNodeDict, search: string): [NodeCateg
 
     Object.entries(config).map(([id, node]) => {
 
-        if (node.private || !node.name.toLocaleLowerCase().includes(search.toLocaleLowerCase())) return;
+        if (node.private) return;
+
+        if (!node.name.toLocaleLowerCase().includes(search.toLocaleLowerCase()) &&
+            !node.category?.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+        ) return;
 
         const category = node.category;
 
