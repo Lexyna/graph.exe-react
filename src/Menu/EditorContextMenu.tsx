@@ -148,12 +148,6 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
     }
 
     useEffect(() => {
-        //const matches: ProtoNode[] = [];
-
-        /*Object.entries(props.config).forEach(([id, node]) => {
-            if (!node.private && node.name.toLocaleLowerCase().includes(searchText.toLocaleLowerCase()))
-                matches.push(node);
-        })*/
         const [matches, max] = createNodeCategories(props.config, searchText);
 
         setCatalogue(matches);
