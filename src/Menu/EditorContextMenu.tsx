@@ -4,6 +4,7 @@ import React, { CSSProperties, KeyboardEvent, useEffect, useLayoutEffect, useRef
 import { ProtoEngineNode, ProtoNode, ProtoNodeDict } from "../ProtoTypes/ProtoNode";
 import { Offset } from "../Utils/utilTypes";
 
+
 const editorContextMenuCSS: CSSProperties = {
     display: "block",
     width: "auto",
@@ -20,7 +21,7 @@ const editorContextMenuCSS: CSSProperties = {
 
 const contextMenuSearchBar: CSSProperties = {
     borderBottom: "1px solid gray",
-    borderRight: "1px solid gray",
+    borderRight: "2px solid gray",
     overflowWrap: "normal",
     fontSize: "x-large",
     backgroundColor: "rgba(63, 63, 63, 1)",
@@ -71,6 +72,14 @@ const contextMenuInput: CSSProperties = {
     color: "white",
     display: "block",
     outline: "none"
+}
+
+const contextMenuCategoryHeader: CSSProperties = {
+    color: "black",
+    backgroundColor: "lightgray",
+    textAlign: "center",
+    paddingLeft: ".3rem",
+    fontStyle: "italic",
 }
 
 export const EditorContextMenu = (props: EditorContextMenuProps) => {
@@ -203,7 +212,7 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
                             catalogue.map((category) => {
                                 listId++;
                                 return (<div key={listId}>
-                                    <header>{category.categoryName}</header>
+                                    <header style={contextMenuCategoryHeader}>{category.categoryName.toLocaleUpperCase()}</header>
                                     {category.nodes.map((showNode) => {
                                         listId++;
                                         return (
