@@ -81,9 +81,8 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
     const [searchText, setSearchText] = useState<string>("nodes");
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
-    const [catalogue, setCatalogue] = useState<NodeCategories>({ nodes: [] })
+    const [catalogue, setCatalogue] = useState<NodeCategory[]>([])
     const [maxIndex, setMaxIndex] = useState<number>(0);
-    const [selectedCategory, setSelectedCategory] = useState<string>("nodes");
 
     const editorContextMenuContainerCSS: CSSProperties = {
         position: "fixed",
@@ -101,13 +100,20 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
         switch (e.key) {
             case "ArrowUp": setSelectedIndex((index) => index > 0 ? index - 1 : index); break;
             case "ArrowDown": setSelectedIndex((index) => index < maxIndex - 1 ? index + 1 : index); break;
-            case "Enter": if (contextMenuRef.current && selectedCategory in catalogue && catalogue[selectedCategory][selectedIndex]) addNodeToEditor(
+            case "Enter": if (contextMenuRef.current) addNodeToEditorByKey(
                 contextMenuRef.current.getBoundingClientRect().x,
-                contextMenuRef.current.getBoundingClientRect().y,
-                catalogue[selectedCategory][selectedIndex].node
+                contextMenuRef.current.getBoundingClientRect().y
             ); break;
             default: break;
         }
+    }
+
+    const addNodeToEditorByKey = (x: number, y: number) => {
+
+        let node = addNodeByIndex(catalogue, selectedIndex);
+
+        if (node === null) return;
+        addNodeToEditor(x, y, node);
     }
 
     const addNodeToEditor = (x: number, y: number, node: ProtoNode) => {
@@ -200,10 +206,11 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
                         style={editorContextMenuCSS} ref={contextMenuRef} onWheel={e => { e.preventDefault(); e.stopPropagation(); }}
                     >
                         {
-                            Object.entries(catalogue).map(([category, showNodes]) => {
-                                return <div key={listId}>
-                                    <header>{category}</header>
-                                    {showNodes.map((showNode) => {
+                            catalogue.map((category) => {
+                                listId++;
+                                return (<div key={listId}>
+                                    <header>{category.categoryName}</header>
+                                    {category.nodes.map((showNode) => {
                                         listId++;
                                         return (
                                             <div
@@ -213,9 +220,8 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
                                                         contextMenuItemSelected : contextMenuItem
                                                 }
                                                 key={listId}
-                                                onKeyDown={() => setSelectedCategory(category)}
                                                 onClick={e => addNodeToEditor(e.clientX, e.clientY, showNode.node)}
-                                                onMouseEnter={() => { setSelectedIndex(showNode.index); setSelectedCategory(category); }}
+                                                onMouseEnter={() => setSelectedIndex(showNode.index)}
                                             >
                                                 <header
                                                     style={contextMenuItemHeader}
@@ -226,7 +232,7 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
                                             </div>
                                         )
                                     })}
-                                </div>
+                                </div>)
                             })
                         }
                     </div>
@@ -250,18 +256,18 @@ export interface showNode {
     index: number,
 }
 
-export interface NodeCategories {
-    [k: string]: showNode[],
+export interface NodeCategory {
+    categoryName: string,
     nodes: showNode[],
 }
 
-const createNodeCategories = (config: ProtoNodeDict, search: string): [NodeCategories, number] => {
+interface categoriesDict {
+    [k: string]: ProtoNode[]
+}
 
-    const categories: NodeCategories = {
-        nodes: []
-    }
+const createNodeCategories = (config: ProtoNodeDict, search: string): [NodeCategory[], number] => {
 
-    let nodeIndex: number = 0;
+    const categoriesDict: categoriesDict = {}
 
     Object.entries(config).map(([id, node]) => {
 
@@ -269,19 +275,62 @@ const createNodeCategories = (config: ProtoNodeDict, search: string): [NodeCateg
 
         const category = node.category;
 
-        if (!category) {
-            categories["nodes"].push({ node: node, index: nodeIndex });
-            nodeIndex++;
-            return;
+        if (!category && !("nodes" in categoriesDict)) {
+            categoriesDict["nodes"] = [node]; return;
         }
 
-        if (category in categories)
-            categories[category].push({ node: node, index: nodeIndex });
-        else
-            categories[category] = [{ node: node, index: nodeIndex }];
+        if (!category) {
+            categoriesDict["nodes"].push(node); return;
+        }
 
-        nodeIndex++;
+        if (category in categoriesDict)
+            categoriesDict[category].push(node);
+        else
+            categoriesDict[category] = [node];
     })
 
+    const categories: NodeCategory[] = []
+
+    let nodeIndex: number = 0;
+
+    Object.entries(categoriesDict).map(([category, nodes]) => {
+        if (category === "nodes") return;
+
+        const showNodes: showNode[] = [];
+
+        nodes.map((n) => { showNodes.push({ node: n, index: nodeIndex }); nodeIndex++; })
+
+        categories.push({ categoryName: category, nodes: showNodes });
+
+    })
+
+    if ("nodes" in categoriesDict) {
+        const showNodes: showNode[] = [];
+        categoriesDict["nodes"].map((node) => {
+            showNodes.push({ node: node, index: nodeIndex }); nodeIndex++;
+        })
+        categories.push({ categoryName: "nodes", nodes: showNodes });
+    }
+
     return [categories, nodeIndex];
+}
+
+const addNodeByIndex = (catalogue: NodeCategory[], index: number): (ProtoNode | null) => {
+
+    let searchIndex = 0;
+
+    for (let i = 0; i < catalogue.length; i++) {
+
+        if (catalogue[i].nodes.length + searchIndex <= index) {
+            searchIndex += catalogue[i].nodes.length;
+            continue;
+        }
+
+        for (let j = 0; j < catalogue[i].nodes.length; j++)
+            if (catalogue[i].nodes[j].index === index) {
+                return catalogue[i].nodes[j].node
+            }
+
+    }
+    return null;
 }
