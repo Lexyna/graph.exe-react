@@ -1,6 +1,6 @@
 import { updateType } from "graph.exe-core";
 import { nanoid } from "nanoid";
-import React, { CSSProperties, KeyboardEvent, useEffect, useRef, useState } from "react";
+import React, { CSSProperties, KeyboardEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ProtoEngineNode, ProtoNode, ProtoNodeDict } from "../ProtoTypes/ProtoNode";
 import { Offset } from "../Utils/utilTypes";
 
@@ -76,6 +76,7 @@ const contextMenuInput: CSSProperties = {
 export const EditorContextMenu = (props: EditorContextMenuProps) => {
 
     const contextMenuRef = useRef<HTMLDivElement>(null);
+    const selectedElement = useRef<HTMLDivElement>(null);
 
     const [searchText, setSearchText] = useState<string>("");
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
@@ -155,6 +156,11 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
 
     let listId = 0;
 
+    useLayoutEffect(() => {
+        if (!selectedElement.current) return;
+        selectedElement.current.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+    })
+
     return (
         <div
             style={editorContextMenuContainerCSS}
@@ -186,6 +192,7 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
                             listId++;
                             return (
                                 <div
+                                    ref={selectedIndex === index ? selectedElement : null}
                                     style={
                                         selectedIndex === index ?
                                             contextMenuItemSelected : contextMenuItem
