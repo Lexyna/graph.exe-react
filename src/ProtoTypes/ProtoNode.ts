@@ -10,6 +10,7 @@ import { ProtoIO } from "./ProtoIO";
 export interface ProtoNode extends ConfigNode {
     name: string,
     description: string,
+    category?: string,
     inputs: ProtoIO<any, any>[];
     outputs: ProtoIO<any, any>[];
     private?: boolean,

@@ -78,10 +78,12 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
     const contextMenuRef = useRef<HTMLDivElement>(null);
     const selectedElement = useRef<HTMLDivElement>(null);
 
-    const [searchText, setSearchText] = useState<string>("");
+    const [searchText, setSearchText] = useState<string>("nodes");
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
-    const [nodes, setNodes] = useState<ProtoNode[]>([])
+    const [catalogue, setCatalogue] = useState<NodeCategories>({ nodes: [] })
+    const [maxIndex, setMaxIndex] = useState<number>(0);
+    const [selectedCategory, setSelectedCategory] = useState<string>("nodes");
 
     const editorContextMenuContainerCSS: CSSProperties = {
         position: "fixed",
@@ -98,11 +100,11 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
     const onKeyDownHandler = (e: KeyboardEvent) => {
         switch (e.key) {
             case "ArrowUp": setSelectedIndex((index) => index > 0 ? index - 1 : index); break;
-            case "ArrowDown": setSelectedIndex((index) => index < nodes.length - 1 ? index + 1 : index); break;
-            case "Enter": if (contextMenuRef.current && nodes[selectedIndex]) addNodeToEditor(
+            case "ArrowDown": setSelectedIndex((index) => index < maxIndex - 1 ? index + 1 : index); break;
+            case "Enter": if (contextMenuRef.current && selectedCategory in catalogue && catalogue[selectedCategory][selectedIndex]) addNodeToEditor(
                 contextMenuRef.current.getBoundingClientRect().x,
                 contextMenuRef.current.getBoundingClientRect().y,
-                nodes[selectedIndex]
+                catalogue[selectedCategory][selectedIndex].node
             ); break;
             default: break;
         }
@@ -140,26 +142,35 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
     }
 
     useEffect(() => {
-        const matches: ProtoNode[] = [];
+        //const matches: ProtoNode[] = [];
 
-        Object.entries(props.config).forEach(([id, node]) => {
+        /*Object.entries(props.config).forEach(([id, node]) => {
             if (!node.private && node.name.toLocaleLowerCase().includes(searchText.toLocaleLowerCase()))
                 matches.push(node);
-        })
+        })*/
+        const [matches, max] = createNodeCategories(props.config, searchText);
 
-        setNodes(matches);
+        setCatalogue(matches);
+        setMaxIndex(max);
     }, [searchText])
 
     useEffect(() => {
         setSearchText("");
     }, [props.show])
 
-    let listId = 0;
-
     useLayoutEffect(() => {
         if (!selectedElement.current) return;
         selectedElement.current.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
     })
+
+    useEffect(() => {
+        const [catalogue, max] = createNodeCategories(props.config, "");
+
+        setCatalogue(catalogue);
+        setMaxIndex(max);
+    }, [])
+
+    let listId = 0;
 
     return (
         <div
@@ -186,31 +197,38 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
                         />
                     </div>
                     <div
-                        style={editorContextMenuCSS} ref={contextMenuRef}
+                        style={editorContextMenuCSS} ref={contextMenuRef} onWheel={e => { e.preventDefault(); e.stopPropagation(); }}
                     >
-                        {nodes.filter(n => (n.private === undefined || !n.private)).map((node, index) => {
-                            listId++;
-                            return (
-                                <div
-                                    ref={selectedIndex === index ? selectedElement : null}
-                                    style={
-                                        selectedIndex === index ?
-                                            contextMenuItemSelected : contextMenuItem
-                                    }
-                                    key={listId}
-                                    onClick={e => addNodeToEditor(e.clientX, e.clientY, node)}
-                                    onMouseEnter={() => setSelectedIndex(index)}
-                                    onWheel={e => { e.preventDefault(); e.stopPropagation(); }}
-                                >
-                                    <header
-                                        style={contextMenuItemHeader}
-                                    >{node.name}</header>
-                                    <span
-                                        style={contextMenuItemSpan}
-                                    >{node.description}</span>
+                        {
+                            Object.entries(catalogue).map(([category, showNodes]) => {
+                                return <div key={listId}>
+                                    <header>{category}</header>
+                                    {showNodes.map((showNode) => {
+                                        listId++;
+                                        return (
+                                            <div
+                                                ref={selectedIndex === showNode.index ? selectedElement : null}
+                                                style={
+                                                    selectedIndex === showNode.index ?
+                                                        contextMenuItemSelected : contextMenuItem
+                                                }
+                                                key={listId}
+                                                onKeyDown={() => setSelectedCategory(category)}
+                                                onClick={e => addNodeToEditor(e.clientX, e.clientY, showNode.node)}
+                                                onMouseEnter={() => { setSelectedIndex(showNode.index); setSelectedCategory(category); }}
+                                            >
+                                                <header
+                                                    style={contextMenuItemHeader}
+                                                >{showNode.node.name}</header>
+                                                <span
+                                                    style={contextMenuItemSpan}
+                                                >{showNode.node.description}</span>
+                                            </div>
+                                        )
+                                    })}
                                 </div>
-                            )
-                        })}
+                            })
+                        }
                     </div>
                 </div> : null}
         </div>
@@ -225,4 +243,45 @@ export interface EditorContextMenuProps {
     show: boolean,
     x: number,
     y: number
+}
+
+export interface showNode {
+    node: ProtoNode,
+    index: number,
+}
+
+export interface NodeCategories {
+    [k: string]: showNode[],
+    nodes: showNode[],
+}
+
+const createNodeCategories = (config: ProtoNodeDict, search: string): [NodeCategories, number] => {
+
+    const categories: NodeCategories = {
+        nodes: []
+    }
+
+    let nodeIndex: number = 0;
+
+    Object.entries(config).map(([id, node]) => {
+
+        if (node.private || !node.name.toLocaleLowerCase().includes(search.toLocaleLowerCase())) return;
+
+        const category = node.category;
+
+        if (!category) {
+            categories["nodes"].push({ node: node, index: nodeIndex });
+            nodeIndex++;
+            return;
+        }
+
+        if (category in categories)
+            categories[category].push({ node: node, index: nodeIndex });
+        else
+            categories[category] = [{ node: node, index: nodeIndex }];
+
+        nodeIndex++;
+    })
+
+    return [categories, nodeIndex];
 }
