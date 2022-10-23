@@ -4,6 +4,7 @@ import React, { CSSProperties, KeyboardEvent, useEffect, useLayoutEffect, useRef
 import { ProtoEngineNode, ProtoNode, ProtoNodeDict } from "../ProtoTypes/ProtoNode";
 import { Offset } from "../Utils/utilTypes";
 
+
 const editorContextMenuCSS: CSSProperties = {
     display: "block",
     width: "auto",
@@ -20,7 +21,7 @@ const editorContextMenuCSS: CSSProperties = {
 
 const contextMenuSearchBar: CSSProperties = {
     borderBottom: "1px solid gray",
-    borderRight: "1px solid gray",
+    borderRight: "2px solid gray",
     overflowWrap: "normal",
     fontSize: "x-large",
     backgroundColor: "rgba(63, 63, 63, 1)",
@@ -73,15 +74,24 @@ const contextMenuInput: CSSProperties = {
     outline: "none"
 }
 
+const contextMenuCategoryHeader: CSSProperties = {
+    color: "black",
+    backgroundColor: "lightgray",
+    textAlign: "center",
+    paddingLeft: ".3rem",
+    fontStyle: "italic",
+}
+
 export const EditorContextMenu = (props: EditorContextMenuProps) => {
 
     const contextMenuRef = useRef<HTMLDivElement>(null);
     const selectedElement = useRef<HTMLDivElement>(null);
 
-    const [searchText, setSearchText] = useState<string>("");
+    const [searchText, setSearchText] = useState<string>("nodes");
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
-    const [nodes, setNodes] = useState<ProtoNode[]>([])
+    const [catalogue, setCatalogue] = useState<NodeCategory[]>([])
+    const [maxIndex, setMaxIndex] = useState<number>(0);
 
     const editorContextMenuContainerCSS: CSSProperties = {
         position: "fixed",
@@ -98,14 +108,21 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
     const onKeyDownHandler = (e: KeyboardEvent) => {
         switch (e.key) {
             case "ArrowUp": setSelectedIndex((index) => index > 0 ? index - 1 : index); break;
-            case "ArrowDown": setSelectedIndex((index) => index < nodes.length - 1 ? index + 1 : index); break;
-            case "Enter": if (contextMenuRef.current && nodes[selectedIndex]) addNodeToEditor(
+            case "ArrowDown": setSelectedIndex((index) => index < maxIndex - 1 ? index + 1 : index); break;
+            case "Enter": if (contextMenuRef.current) addNodeToEditorByKey(
                 contextMenuRef.current.getBoundingClientRect().x,
-                contextMenuRef.current.getBoundingClientRect().y,
-                nodes[selectedIndex]
+                contextMenuRef.current.getBoundingClientRect().y
             ); break;
             default: break;
         }
+    }
+
+    const addNodeToEditorByKey = (x: number, y: number) => {
+
+        let node = addNodeByIndex(catalogue, selectedIndex);
+
+        if (node === null) return;
+        addNodeToEditor(x, y, node);
     }
 
     const addNodeToEditor = (x: number, y: number, node: ProtoNode) => {
@@ -140,26 +157,29 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
     }
 
     useEffect(() => {
-        const matches: ProtoNode[] = [];
+        const [matches, max] = createNodeCategories(props.config, searchText);
 
-        Object.entries(props.config).forEach(([id, node]) => {
-            if (!node.private && node.name.toLocaleLowerCase().includes(searchText.toLocaleLowerCase()))
-                matches.push(node);
-        })
-
-        setNodes(matches);
+        setCatalogue(matches);
+        setMaxIndex(max);
     }, [searchText])
 
     useEffect(() => {
         setSearchText("");
     }, [props.show])
 
-    let listId = 0;
-
     useLayoutEffect(() => {
         if (!selectedElement.current) return;
         selectedElement.current.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
     })
+
+    useEffect(() => {
+        const [catalogue, max] = createNodeCategories(props.config, "");
+
+        setCatalogue(catalogue);
+        setMaxIndex(max);
+    }, [])
+
+    let listId = 0;
 
     return (
         <div
@@ -186,31 +206,38 @@ export const EditorContextMenu = (props: EditorContextMenuProps) => {
                         />
                     </div>
                     <div
-                        style={editorContextMenuCSS} ref={contextMenuRef}
+                        style={editorContextMenuCSS} ref={contextMenuRef} onWheel={e => { e.preventDefault(); e.stopPropagation(); }}
                     >
-                        {nodes.filter(n => (n.private === undefined || !n.private)).map((node, index) => {
-                            listId++;
-                            return (
-                                <div
-                                    ref={selectedIndex === index ? selectedElement : null}
-                                    style={
-                                        selectedIndex === index ?
-                                            contextMenuItemSelected : contextMenuItem
-                                    }
-                                    key={listId}
-                                    onClick={e => addNodeToEditor(e.clientX, e.clientY, node)}
-                                    onMouseEnter={() => setSelectedIndex(index)}
-                                    onWheel={e => { e.preventDefault(); e.stopPropagation(); }}
-                                >
-                                    <header
-                                        style={contextMenuItemHeader}
-                                    >{node.name}</header>
-                                    <span
-                                        style={contextMenuItemSpan}
-                                    >{node.description}</span>
-                                </div>
-                            )
-                        })}
+                        {
+                            catalogue.map((category) => {
+                                listId++;
+                                return (<div key={listId}>
+                                    <header style={contextMenuCategoryHeader}>{category.categoryName.toLocaleUpperCase()}</header>
+                                    {category.nodes.map((showNode) => {
+                                        listId++;
+                                        return (
+                                            <div
+                                                ref={selectedIndex === showNode.index ? selectedElement : null}
+                                                style={
+                                                    selectedIndex === showNode.index ?
+                                                        contextMenuItemSelected : contextMenuItem
+                                                }
+                                                key={listId}
+                                                onClick={e => addNodeToEditor(e.clientX, e.clientY, showNode.node)}
+                                                onMouseEnter={() => setSelectedIndex(showNode.index)}
+                                            >
+                                                <header
+                                                    style={contextMenuItemHeader}
+                                                >{showNode.node.name}</header>
+                                                <span
+                                                    style={contextMenuItemSpan}
+                                                >{showNode.node.description}</span>
+                                            </div>
+                                        )
+                                    })}
+                                </div>)
+                            })
+                        }
                     </div>
                 </div> : null}
         </div>
@@ -225,4 +252,92 @@ export interface EditorContextMenuProps {
     show: boolean,
     x: number,
     y: number
+}
+
+export interface showNode {
+    node: ProtoNode,
+    index: number,
+}
+
+export interface NodeCategory {
+    categoryName: string,
+    nodes: showNode[],
+}
+
+interface categoriesDict {
+    [k: string]: ProtoNode[]
+}
+
+const createNodeCategories = (config: ProtoNodeDict, search: string): [NodeCategory[], number] => {
+
+    const categoriesDict: categoriesDict = {}
+
+    Object.entries(config).map(([id, node]) => {
+
+        if (node.private) return;
+
+        if (!node.name.toLocaleLowerCase().includes(search.toLocaleLowerCase()) &&
+            !node.category?.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+        ) return;
+
+        const category = node.category;
+
+        if (!category && !("nodes" in categoriesDict)) {
+            categoriesDict["nodes"] = [node]; return;
+        }
+
+        if (!category) {
+            categoriesDict["nodes"].push(node); return;
+        }
+
+        if (category in categoriesDict)
+            categoriesDict[category].push(node);
+        else
+            categoriesDict[category] = [node];
+    })
+
+    const categories: NodeCategory[] = []
+
+    let nodeIndex: number = 0;
+
+    Object.entries(categoriesDict).map(([category, nodes]) => {
+        if (category === "nodes") return;
+
+        const showNodes: showNode[] = [];
+
+        nodes.map((n) => { showNodes.push({ node: n, index: nodeIndex }); nodeIndex++; })
+
+        categories.push({ categoryName: category, nodes: showNodes });
+
+    })
+
+    if ("nodes" in categoriesDict) {
+        const showNodes: showNode[] = [];
+        categoriesDict["nodes"].map((node) => {
+            showNodes.push({ node: node, index: nodeIndex }); nodeIndex++;
+        })
+        categories.push({ categoryName: "nodes", nodes: showNodes });
+    }
+
+    return [categories, nodeIndex];
+}
+
+const addNodeByIndex = (catalogue: NodeCategory[], index: number): (ProtoNode | null) => {
+
+    let searchIndex = 0;
+
+    for (let i = 0; i < catalogue.length; i++) {
+
+        if (catalogue[i].nodes.length + searchIndex <= index) {
+            searchIndex += catalogue[i].nodes.length;
+            continue;
+        }
+
+        for (let j = 0; j < catalogue[i].nodes.length; j++)
+            if (catalogue[i].nodes[j].index === index) {
+                return catalogue[i].nodes[j].node
+            }
+
+    }
+    return null;
 }
