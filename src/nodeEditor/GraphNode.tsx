@@ -55,8 +55,6 @@ export const GraphNode = (props: NodeProps) => {
             props.deleteNode(props.engineNode.id)
     }
 
-    let ioKey = 0;
-
     return (
         <div>
             <div
@@ -75,52 +73,16 @@ export const GraphNode = (props: NodeProps) => {
                 >
                     {props.configNode.name}
                 </header>
-                {props.engineNode.inputs.map((io, index) => {
-                    ioKey++;
-                    return (
-                        <ul style={io_ul_CSS} key={ioKey}>
-                            <NodeIO
-                                key={ioKey++}
-                                nodeId={props.engineNode.id}
-                                index={index}
-                                isInput={true}
-                                label={
-                                    !props.debugMode ? props.configNode.inputs[index].label :
-                                        props.configNode.inputs[index].label + "(" + JSON.stringify(props.engineNode.inputs[index].value) + ")"}
-                                io={io}
-                                extra={props.configNode.inputs[index].extra}
-                                updateData={props.updateData}
-                                addConnectionReference={props.addConnectionReferences}
-                                onInputClicked={props.onInputClicked}
-                                style={props.configNode.inputs[index].style}
-                            >
-                            </NodeIO>
-                        </ul>
-                    )
-                })}
-                {props.engineNode.outputs.map((io, index) => {
-                    ioKey++;
-                    return (
-                        <ul style={io_ul_CSS} key={ioKey}>
-                            <NodeIO
-                                key={ioKey++}
-                                nodeId={props.engineNode.id}
-                                index={index}
-                                isInput={false}
-                                label={
-                                    !props.debugMode ? props.configNode.outputs[index].label :
-                                        props.configNode.outputs[index].label + "(" + JSON.stringify(props.engineNode.outputs[index].value) + ")"}
-                                io={io}
-                                extra={props.configNode.outputs[index].extra}
-                                updateData={props.updateData}
-                                addConnectionReference={props.addConnectionReferences}
-                                onOutputClicked={props.onOutputClicked}
-                                style={props.configNode.outputs[index].style}
-                            >
-                            </NodeIO>
-                        </ul>
-                    )
-                })}
+                <PortRenderer
+                    configNode={props.configNode}
+                    engineNode={props.engineNode}
+                    debugMode={props.debugMode}
+                    updateData={props.updateData}
+                    addConnectionReferences={props.addConnectionReferences}
+                    onOutputClicked={props.onOutputClicked}
+                    onInputClicked={props.onInputClicked}
+                    reverse={props.configNode.style?.reversePorts ? props.configNode.style.reversePorts : false}
+                />
             </div>
         </div >
     )
@@ -139,6 +101,127 @@ export interface NodeProps {
     dragHandler: (id: string, x: number, y: number) => void,
     deleteNode: (id: string) => void,
     reorderNode: (index: number) => void,
+    addConnectionReferences: (ref: ConnectionDot, isInput: boolean, index: number) => void,
+    onOutputClicked: (ioDetails: ConnectionDetails) => void,
+    onInputClicked: (inputDetails: ConnectionDetails) => void,
+}
+
+
+const PortRenderer = (props: PortRendererProps) => {
+
+    let ioKey: number = 0;
+
+    return (
+        <div>
+            {
+                props.reverse ? // reverse: true
+                    <div>
+                        {props.engineNode.outputs.map((io, index) => {
+                            ioKey++;
+                            return (
+                                <ul style={io_ul_CSS} key={ioKey}>
+                                    <NodeIO
+                                        key={ioKey++}
+                                        nodeId={props.engineNode.id}
+                                        index={index}
+                                        isInput={false}
+                                        label={
+                                            !props.debugMode ? props.configNode.outputs[index].label :
+                                                props.configNode.outputs[index].label + "(" + JSON.stringify(props.engineNode.outputs[index].value) + ")"}
+                                        io={io}
+                                        extra={props.configNode.outputs[index].extra}
+                                        updateData={props.updateData}
+                                        addConnectionReference={props.addConnectionReferences}
+                                        onOutputClicked={props.onOutputClicked}
+                                        style={props.configNode.outputs[index].style}
+                                    >
+                                    </NodeIO>
+                                </ul>
+                            )
+                        })}
+                        {props.engineNode.inputs.map((io, index) => {
+                            ioKey++;
+                            return (
+                                <ul style={io_ul_CSS} key={ioKey}>
+                                    <NodeIO
+                                        key={ioKey++}
+                                        nodeId={props.engineNode.id}
+                                        index={index}
+                                        isInput={true}
+                                        label={
+                                            !props.debugMode ? props.configNode.inputs[index].label :
+                                                props.configNode.inputs[index].label + "(" + JSON.stringify(props.engineNode.inputs[index].value) + ")"}
+                                        io={io}
+                                        extra={props.configNode.inputs[index].extra}
+                                        updateData={props.updateData}
+                                        addConnectionReference={props.addConnectionReferences}
+                                        onInputClicked={props.onInputClicked}
+                                        style={props.configNode.inputs[index].style}
+                                    >
+                                    </NodeIO>
+                                </ul>
+                            )
+                        })}
+                    </div> : //reverse: false
+                    <div>
+                        {props.engineNode.inputs.map((io, index) => {
+                            ioKey++;
+                            return (
+                                <ul style={io_ul_CSS} key={ioKey}>
+                                    <NodeIO
+                                        key={ioKey++}
+                                        nodeId={props.engineNode.id}
+                                        index={index}
+                                        isInput={true}
+                                        label={
+                                            !props.debugMode ? props.configNode.inputs[index].label :
+                                                props.configNode.inputs[index].label + "(" + JSON.stringify(props.engineNode.inputs[index].value) + ")"}
+                                        io={io}
+                                        extra={props.configNode.inputs[index].extra}
+                                        updateData={props.updateData}
+                                        addConnectionReference={props.addConnectionReferences}
+                                        onInputClicked={props.onInputClicked}
+                                        style={props.configNode.inputs[index].style}
+                                    >
+                                    </NodeIO>
+                                </ul>
+                            )
+                        })}
+                        {props.engineNode.outputs.map((io, index) => {
+                            ioKey++;
+                            return (
+                                <ul style={io_ul_CSS} key={ioKey}>
+                                    <NodeIO
+                                        key={ioKey++}
+                                        nodeId={props.engineNode.id}
+                                        index={index}
+                                        isInput={false}
+                                        label={
+                                            !props.debugMode ? props.configNode.outputs[index].label :
+                                                props.configNode.outputs[index].label + "(" + JSON.stringify(props.engineNode.outputs[index].value) + ")"}
+                                        io={io}
+                                        extra={props.configNode.outputs[index].extra}
+                                        updateData={props.updateData}
+                                        addConnectionReference={props.addConnectionReferences}
+                                        onOutputClicked={props.onOutputClicked}
+                                        style={props.configNode.outputs[index].style}
+                                    >
+                                    </NodeIO>
+                                </ul>
+                            )
+                        })}
+                    </div>
+            }
+        </div>
+    )
+}
+
+interface PortRendererProps {
+    reverse: boolean, // If true, render outputs before inputs
+    engineNode: ProtoEngineNode,
+    configNode: ProtoNode,
+    debugMode: boolean,
+    updateData: (id: string, input: boolean, index: number, data: any) => void,
     addConnectionReferences: (ref: ConnectionDot, isInput: boolean, index: number) => void,
     onOutputClicked: (ioDetails: ConnectionDetails) => void,
     onInputClicked: (inputDetails: ConnectionDetails) => void,

@@ -194,10 +194,10 @@ export const NodeEditor = (props: NodeEditorProps) => {
             }
         })
 
-        setConnectionWrapper(connectionsCopy)
+        setConnectionWrapper(connectionsCopy);
         setNodeWrapper(newNodes);
-        setConnectionReferences(referenceCopy)
-        triggerGraphUpdate()
+        setConnectionReferences(referenceCopy);
+        triggerGraphUpdate();
     }
 
     const reorderNode = (index: number) => {

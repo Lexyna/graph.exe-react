@@ -19,7 +19,8 @@ export interface ProtoNode extends ConfigNode {
 
 export interface ProtoNodeStyle {
     headerColor?: string,
-    bodyColor?: string
+    bodyColor?: string,
+    reversePorts?: boolean
 }
 
 export interface ProtoNodeDict {
